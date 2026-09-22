@@ -3,12 +3,11 @@ const { db } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const paths = require('../paths');
 const router = express.Router();
 
 // 确保上传目录存在
-const uploadsDir = path.join(__dirname, '../../frontend/assets/uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+const uploadsDir = paths.productUploadDir();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),

@@ -4,11 +4,11 @@ const { authMiddleware } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const paths = require('../paths');
 const router = express.Router();
 
 // CSV上传目录
-const csvDir = path.join(__dirname, '../../uploads/csv');
-if (!fs.existsSync(csvDir)) fs.mkdirSync(csvDir, { recursive: true });
+const csvDir = paths.csvDir();
 
 const upload = multer({ dest: csvDir, limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -113,8 +113,7 @@ router.post('/upload-csv', authMiddleware, upload.single('csvfile'), (req, res) 
   }
 });
 // 甲骨文图片上传目录
-const imgDir = path.join(__dirname, '../../public/images/oracle');
-if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
+const imgDir = paths.oracleImgDir();
 
 const imgUpload = multer({
   storage: multer.diskStorage({
@@ -144,7 +143,7 @@ router.post('/:id/upload-image', authMiddleware, imgUpload.single('image'), (req
 
     // 删除旧图片文件（如果存在）
     if (item.image_url && item.image_url.startsWith('/images/oracle/')) {
-      const oldPath = path.join(__dirname, '../../public', item.image_url);
+      const oldPath = path.join(imgDir, path.basename(item.image_url));
       try { fs.unlinkSync(oldPath); } catch(e) {}
     }
 

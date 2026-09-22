@@ -1,11 +1,22 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 const bcrypt = require('bcryptjs');
-
-const dbPath = path.join(__dirname, 'data', 'store.db');
 const fs = require('fs');
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+const paths = require('./paths');
+
+const dbPath = paths.dbPath();
+
+// 打包成 exe 后，首次运行时若外部没有数据库，则从打包内置的数据库复制一份
+if (paths.isPkg && !fs.existsSync(dbPath)) {
+  const bundledDb = path.join(__dirname, 'data', 'store.db');
+  try {
+    const buf = fs.readFileSync(bundledDb);
+    fs.writeFileSync(dbPath, buf);
+    console.log('✓ 已初始化数据库文件');
+  } catch (e) {
+    console.error('复制内置数据库失败:', e.message);
+  }
+}
 
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
