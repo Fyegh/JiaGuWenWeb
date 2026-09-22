@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>甲骨文字馆 | 象形文创</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .page-hero {
+      padding: 130px 0 60px; text-align: center; position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 800px 500px at 50% 60%, rgba(212,175,55,0.04) 0%, transparent 70%);
+    }
+    .page-hero .section-label { margin-bottom: 10px; }
+    .page-hero h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
+    .page-hero p { color: var(--text-secondary); font-size: 0.95rem; max-width: 560px; margin: 0 auto; line-height: 1.8; }
+
+    .oracle-main { max-width: 1400px; margin: 0 auto; padding: 0 40px 80px; }
+
+    /* 管理员上传区域 */
+    .upload-zone {
+      background: var(--bg-card); border: 1px dashed rgba(212,175,55,0.2); border-radius: 14px;
+      padding: 30px; margin-bottom: 40px; text-align: center;
+      transition: all 0.3s;
+    }
+    .upload-zone:hover { border-color: var(--gold); }
+    .upload-zone h3 { font-family: var(--font-serif); font-size: 1rem; margin-bottom: 12px; }
+    .upload-zone p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px; }
+    .upload-zone .upload-row { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .upload-zone input[type="file"] {
+      padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+      border-radius: 8px; color: var(--text-primary); font-size: 0.85rem;
+    }
+    .upload-btn {
+      padding: 10px 24px; background: var(--gold); border: none; border-radius: 8px;
+      color: #000; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s;
+    }
+    .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.3); }
+    .upload-result { margin-top: 12px; font-size: 0.82rem; color: var(--gold); }
+
+    /* 搜索 */
+    .oracle-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 30px; flex-wrap: wrap; gap: 16px;
+    }
+    .oracle-search {
+      display: flex; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .oracle-search:focus-within { border-color: var(--gold); }
+    .oracle-search input {
+      background: transparent; border: none; padding: 10px 16px;
+      color: var(--text-primary); font-size: 0.88rem; width: 260px; outline: none;
+    }
+    .oracle-search button {
+      padding: 10px 16px; background: transparent; border: none;
+      color: var(--text-muted); cursor: pointer; transition: color 0.3s;
+    }
+    .oracle-search button:hover { color: var(--gold); }
+    .oracle-total { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* 字卡网格 */
+    .oracle-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+    }
+
+    .oracle-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 14px; overflow: hidden; cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.16,1,0.3,1);
+      position: relative;
+    }
+    .oracle-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--gold);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(212,175,55,0.06);
+    }
+
+    .oracle-card .card-glow {
+      position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(212,175,55,0.07) 0%, transparent 55%);
+      pointer-events: none; z-index: 1;
+    }
+    .oracle-card:hover .card-glow { opacity: 1; }
+
+    .oracle-card-img {
+      width: 100%; height: 200px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #0a0908, #141210);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .oracle-card-img img {
+      width: 100%; height: 100%; object-fit: contain; padding: 20px;
+      transition: transform 0.8s cubic-bezier(0.16,1,0.3,1), filter 0.5s;
+      filter: brightness(0.9);
+    }
+    .oracle-card:hover .oracle-card-img img {
+      transform: scale(1.1);
+      filter: brightness(1.1);
+    }
+
+    .oracle-card-placeholder {
+      font-family: var(--font-serif); font-size: 5rem;
+      color: rgba(212,175,55,0.06);
+      transition: all 1s cubic-bezier(0.16,1,0.3,1);
+    }
+    .oracle-card:hover .oracle-card-placeholder {
+      color: rgba(212,175,55,0.2);
+      transform: scale(1.2) rotate(5deg);
+      text-shadow: 0 0 60px rgba(212,175,55,0.15);
+    }
+
+    .oracle-card-body { padding: 20px; position: relative; z-index: 2; }
+
+    .oracle-card-hanzi {
+      font-family: var(--font-serif); font-size: 2rem; font-weight: 700;
+      color: var(--gold); display: inline-block;
+      transition: all 0.4s;
+    }
+    .oracle-card:hover .oracle-card-hanzi { transform: scale(1.1); }
+
+    .oracle-card-pinyin {
+      font-size: 0.85rem; color: var(--text-secondary);
+      margin-left: 10px; letter-spacing: 1px;
+    }
+
+    .oracle-card-desc {
+      font-size: 0.82rem; color: var(--text-muted); line-height: 1.7;
+      margin-top: 10px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .oracle-card-type {
+      display: inline-block; margin-top: 10px; padding: 3px 10px;
+      border: 1px solid rgba(212,175,55,0.15); border-radius: 4px;
+      font-size: 0.68rem; color: var(--gold); letter-spacing: 1px;
+    }
+
+    /* 分页 */
+    .oracle-pagi { display: flex; justify-content: center; gap: 8px; margin-top: 50px; }
+    .oracle-pagi button {
+      padding: 10px 18px; border: 1px solid var(--border-color); border-radius: 6px;
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+      transition: all 0.3s; font-size: 0.82rem;
+    }
+    .oracle-pagi button:hover, .oracle-pagi button.active {
+      background: var(--gold); border-color: var(--gold); color: #000;
+    }
+    .oracle-pagi button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* 详情弹窗 */
+    .oracle-modal {
+      position: fixed; inset: 0; z-index: 10000;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+      animation: modalIn 0.4s;
+    }
+    .oracle-modal.show { display: flex; }
+    @keyframes modalIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .oracle-modal-content {
+      background: #0c0c0c; border: 1px solid rgba(212,175,55,0.15);
+      border-radius: 20px; max-width: 600px; width: 90%; padding: 50px;
+      position: relative; animation: modalSlide 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes modalSlide { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;
+      border: 1px solid var(--border-color); border-radius: 50%; background: transparent;
+      color: var(--text-muted); font-size: 1rem; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { border-color: var(--gold); color: var(--gold); }
+
+    .modal-img {
+      width: 200px; height: 200px; margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border-color); border-radius: 14px;
+      overflow: hidden; background: linear-gradient(135deg, #080806, #121110);
+    }
+    .modal-img img { width: 100%; height: 100%; object-fit: contain; padding: 16px; }
+    .modal-img .modal-ph {
+      font-family: var(--font-serif); font-size: 6rem; color: rgba(212,175,55,0.08);
+    }
+    .modal-hanzi {
+      text-align: center; font-family: var(--font-serif); font-size: 3rem;
+      color: var(--gold); margin-bottom: 4px;
+    }
+    .modal-pinyin { text-align: center; font-size: 1rem; color: var(--text-secondary); margin-bottom: 20px; }
+    .modal-desc {
+      font-size: 0.9rem; color: var(--text-muted); line-height: 2;
+      padding: 20px; background: rgba(212,175,55,0.02); border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+      .oracle-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .oracle-card-img { height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="nav-logo"><span class="logo-icon">甲</span><span>象形文创</span></a>
+    <ul class="nav-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/products.html">全部产品</a></li>
+      <li><a href="/oracle.html" class="active">甲骨文字馆</a></li>
+      <li><a href="/history.html">千年之旅</a></li>
+      <li><a href="/favorites.html">收藏</a></li>
+      <li><a href="/cart.html">购物车</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="section-label animate-on-scroll">ORACLE BONE SCRIPT</div>
+    <h1 class="animate-on-scroll">甲骨 <span class="gold-text">文字馆</span></h1>
+    <p class="animate-on-scroll delay-1">
+      探索三千年前的文字之美，每一个象形符号都承载着先民的智慧与想象。
+    </p>
+  </section>
+
+  <main class="oracle-main">
+    <!-- 管理员上传区 -->
+    <div class="upload-zone" id="uploadZone" style="display:none;">
+      <h3>📂 导入甲骨文数据</h3>
+      <p>上传 Excel(.xlsx) 文件批量导入甲骨文数据（表头：hanzi/汉字, pinyin/拼音, desc/描述, img/图片）</p>
+      <div class="upload-row">
+        <input type="file" id="csvFile" accept=".xlsx,.xls">
+        <button class="upload-btn" onclick="uploadCSV()">导入Excel</button>
+        <button class="upload-btn" style="background:#e74c3c;" onclick="clearAllOracle()">🗑 清空全部数据</button>
+      </div>
+      <div class="upload-result" id="uploadResult"></div>
+    </div>
+    <!-- 搜索 -->
+    <div class="oracle-toolbar">
+      <div class="oracle-search">
+        <input type="text" id="oracleSearch" placeholder="搜索汉字或注释…">
+        <button onclick="OB.search()">🔍</button>
+      </div>
+      <div class="oracle-total" id="oracleTotal"></div>
+    </div>
+
+    <!-- 字卡网格 -->
+    <div class="oracle-grid" id="oracleGrid"></div>
+    <div class="oracle-pagi" id="oraclePagi"></div>
+  </main>
+
+  <!-- 详情弹窗 -->
+  <div class="oracle-modal" id="oracleModal" onclick="if(event.target===this)closeModal()">
+    <div class="oracle-modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-img" id="modalImg"></div>
+      <div class="modal-hanzi" id="modalHanzi"></div>
+      <div class="modal-pinyin" id="modalPinyin"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div id="modalUploadArea" style="display:none;margin-top:20px;text-align:center;padding:16px;border:1px dashed rgba(212,175,55,0.2);border-radius:10px;"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div style="max-width:1400px;margin:0 auto;padding:40px;text-align:center;">
+      <span style="font-size:0.78rem;color:var(--text-muted);">© 2024 象形文创 · 甲骨文字馆</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/animations.js"></script>
+  <script>
+      async function clearAllOracle() {
+      if (!confirm('确定要删除所有已导入的甲骨文数据吗？此操作不可恢复！')) return;
+      try {
+        const token = Auth.getToken();
+        const resp = await fetch('/api/oracle/clear-all', {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error);
+        showToast(data.message, 'success');
+        OB.load();
+      } catch(e) {
+        showToast('清空失败: ' + e.message, 'error');
+      }
+    }
+    // 管理员显示上传区
+    if (Auth.isAdmin()) {
+      document.getElementById('uploadZone').style.display = 'block';
+    }
+
+    async function uploadCSV() {
+      const file = document.getElementById('csvFile').files[0];
+      if (!file) { showToast('请选择CSV文件', 'warning'); return; }
+      const form = new FormData();
+      form.append('csvfile', file);
+      const result = document.getElementById('uploadResult');
+      result.textContent = '导入中…';
+      try {
+        const data = await API.uploadOracleCSV(form);
+        result.textContent = data.message;
+        showToast(data.message, 'success');
+        OB.load();
+      } catch(e) {
+        result.textContent = '导入失败: ' + e.message;
+        showToast(e.message, 'error');
+      }
+    }
+
+    const OB = {
+      page: 1, limit: 24, q: '',
+
+      async load() {
+        const grid = document.getElementById('oracleGrid');
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px"><div class="loader-oracle"></div></div>';
+
+        try {
+          const params = { page: this.page, limit: this.limit };
+          if (this.q) params.search = this.q;
+          const data = await API.getOracleList(params);
+
+          document.getElementById('oracleTotal').textContent = `共 ${data.total} 个字符`;
+
+          if (!data.items || data.items.length === 0) {
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:80px;"><p style="font-size:1.2rem;color:var(--text-muted);">暂无数据</p><p style="color:var(--text-muted);font-size:0.85rem;margin-top:10px;">管理员可上传CSV文件导入甲骨文数据</p></div>';
+            return;
+          }
+
+          grid.innerHTML = data.items.map((item, i) => {
+            let img = '';
+            if (item.image_url && item.image_url.trim()) {
+              img = `<img src="${item.image_url}" alt="${item.hanzi}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                     <div class="oracle-card-placeholder" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">${item.hanzi}</div>`;
+            } else {
+              img = `<div class="oracle-card-placeholder">${item.hanzi}</div>`;
+            }
+
+            // 提取字形类型
+            let charType = '';
+            const desc = item.description || '';
+            if (desc.includes('象形')) charType = '象形字';
+            else if (desc.includes('会意')) charType = '会意字';
+            else if (desc.includes('形声')) charType = '形声字';
+            else if (desc.includes('指事')) charType = '指事字';
+
+            return `
+              <div class="oracle-card animate-on-scroll" style="transition-delay:${(i%12)*0.04}s"
+                   onclick='showDetail(${JSON.stringify(item).replace(/'/g,"&#39;")})'>
+                <div class="card-glow"></div>
+                <div class="oracle-card-img" style="position:relative">
+                  ${img}
+                </div>
+                <div class="oracle-card-body">
+                  <span class="oracle-card-hanzi">${item.hanzi}</span>
+                  <span class="oracle-card-pinyin">${item.pinyin}</span>
+                  ${charType ? `<span class="oracle-card-type">${charType}</span>` : ''}
+                  <div class="oracle-card-desc">${desc}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          this.renderPagi(data.totalPages);
+
+          // 卡片光标追踪
+          grid.querySelectorAll('.oracle-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+              const r = card.getBoundingClientRect();
+              card.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+              card.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+            });
+          });
+
+          setTimeout(() => { if(window.animEngine) window.animEngine.observeNewElements(); }, 50);
+        } catch(e) {
+          console.error(e);
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px;"><p style="color:#e74c3c;">${e.message}</p><button class="btn btn-primary" onclick="OB.load()" style="margin-top:16px">重试</button></div>`;
+        }
+      },
+
+      renderPagi(total) {
+        const box = document.getElementById('oraclePagi');
+        if (total <= 1) { box.innerHTML = ''; return; }
+        let h = `<button ${this.page<=1?'disabled':''} onclick="OB.goPage(${this.page-1})">上一页</button>`;
+        for (let i = 1; i <= total; i++) {
+          if (i===1 || i===total || Math.abs(i-this.page)<=2) {
+            h += `<button class="${i===this.page?'active':''}" onclick="OB.goPage(${i})">${i}</button>`;
+          } else if (Math.abs(i-this.page)===3) {
+            h += `<button disabled>…</button>`;
+          }
+        }
+        h += `<button ${this.page>=total?'disabled':''} onclick="OB.goPage(${this.page+1})">下一页</button>`;
+        box.innerHTML = h;
+      },
+
+      search() {
+        this.q = document.getElementById('oracleSearch').value.trim();
+        this.page = 1;
+        this.load();
+      },
+
+      goPage(p) {
+        this.page = p;
+        this.load();
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+      }
+    };
+
+function showDetail(item) {
+  const modal = document.getElementById('oracleModal');
+  const imgBox = document.getElementById('modalImg');
+
+  // 记录当前查看的item id
+  modal.dataset.itemId = item.id;
+
+  if (item.image_url && item.image_url.trim()) {
+    imgBox.innerHTML = `<img src="${item.image_url}" alt="${item.hanzi}" onerror="this.outerHTML='<div class=\\'modal-ph\\'>${item.hanzi}</div>'">`;
+  } else {
+    imgBox.innerHTML = `<div class="modal-ph">${item.hanzi}</div>`;
+  }
+
+  document.getElementById('modalHanzi').textContent = item.hanzi;
+  document.getElementById('modalPinyin').textContent = item.pinyin || '';
+  document.getElementById('modalDesc').textContent = item.description || '暂无详细描述';
+
+  // 管理员显示上传图片按钮
+  const uploadArea = document.getElementById('modalUploadArea');
+  if (Auth.isAdmin()) {
+    uploadArea.style.display = 'block';
+    uploadArea.innerHTML = `
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;">
+        <input type="file" id="modalImageFile" accept="image/*"
+          style="padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:0.8rem;">
+        <button onclick="uploadOracleImage(${item.id})"
+          style="padding:8px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-weight:600;font-size:0.8rem;cursor:pointer;">
+          📷 上传图片
+        </button>
+      </div>
+      <div id="modalUploadMsg" style="margin-top:8px;font-size:0.78rem;color:var(--gold);"></div>
+    `;
+  } else {
+    uploadArea.style.display = 'none';
+  }
+
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+async function uploadOracleImage(id) {
+  const fileInput = document.getElementById('modalImageFile');
+  const msg = document.getElementById('modalUploadMsg');
+  if (!fileInput.files[0]) { showToast('请先选择图片', 'warning'); return; }
+
+  const form = new FormData();
+  form.append('image', fileInput.files[0]);
+  msg.textContent = '上传中…';
+
+  try {
+    const token = Auth.getToken();
+    const resp = await fetch(`/api/oracle/${id}/upload-image`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: form
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error);
+
+    msg.textContent = '✅ ' + data.message;
+    showToast(data.message, 'success');
+
+    // 立即更新弹窗里的图片
+    document.getElementById('modalImg').innerHTML =
+      `<img src="${data.image_url}?t=${Date.now()}" alt="" style="width:100%;height:100%;object-fit:contain;padding:16px;">`;
+
+    // 刷新列表
+    OB.load();
+  } catch(e) {
+    msg.textContent = '❌ ' + e.message;
+    showToast(e.message, 'error');
+  }
+}
+    function closeModal() {
+      document.getElementById('oracleModal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    document.getElementById('oracleSearch').addEventListener('keypress', e => { if(e.key==='Enter') OB.search(); });
+
+    document.addEventListener('DOMContentLoaded', () => OB.load());
+  </script>
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全部产品 | 象形文创</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .page-hero {
+      padding: 130px 0 50px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 600px 400px at 50% 60%, rgba(212,175,55,0.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-hero .section-label { margin-bottom: 10px; }
+    .page-hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      margin-bottom: 10px;
+    }
+    .page-hero p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+      padding: 20px 0; border-bottom: 1px solid var(--border-color);
+      margin-bottom: 30px;
+    }
+    .toolbar-cats {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .toolbar-cats {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      padding-bottom: 5px;
+      /* 横向可滚动（移动端友好） */
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .toolbar-cats::-webkit-scrollbar { display: none; }
+
+    .cat-chip {
+      padding: 9px 22px; 
+      border: 1px solid rgba(212,175,55,0.2); 
+      border-radius: 30px;
+      background: rgba(255,255,255,0.03); 
+      color: rgba(255,255,255,0.55); 
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      cursor: pointer; 
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1); 
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 悬停光晕 */
+    .cat-chip::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(212,175,55,0.15) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .cat-chip:hover::before { opacity: 1; }
+
+    .cat-chip:hover {
+      border-color: rgba(212,175,55,0.5);
+      color: #d4af37;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(212,175,55,0.1);
+    }
+
+    .cat-chip.active {
+      background: linear-gradient(135deg, #d4af37, #a07818);
+      border-color: transparent;
+      color: #0a0a0a;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+    }
+    .cat-chip.active::before { display: none; }
+    .cat-chip.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(212,175,55,0.45);
+      filter: brightness(1.1);
+    }
+    .toolbar-right { display: flex; gap: 12px; align-items: center; }
+
+    .search-box {
+      display: flex; border: 1px solid var(--border-color); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.3s;
+    }
+    .search-box:focus-within { border-color: var(--gold); }
+    .search-box input {
+      background: transparent; border: none; padding: 10px 16px;
+      color: var(--text-primary); font-size: 0.88rem; width: 200px; outline: none;
+    }
+    .search-box button {
+      padding: 10px 14px; background: transparent; border: none;
+      color: var(--text-muted); cursor: pointer; transition: color 0.3s;
+    }
+    .search-box button:hover { color: var(--gold); }
+
+    .sort-sel {
+      padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 8px; color: var(--text-primary); font-size: 0.82rem; cursor: pointer; outline: none;
+    }
+
+    .result-info { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px; }
+
+    /* 产品卡片 */
+    .pgrid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;
+    }
+    .pcard {
+      position: relative; background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; overflow: hidden; cursor: pointer;
+      transition: all 0.6s var(--transition-smooth);
+    }
+    .pcard:hover {
+      transform: translateY(-10px);
+      border-color: var(--gold);
+      box-shadow: 0 25px 70px rgba(0,0,0,0.35), 0 0 40px rgba(212,175,55,0.06);
+    }
+    .pcard .pcard-glow {
+      position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(212,175,55,0.06) 0%, transparent 60%);
+      pointer-events: none; z-index: 1;
+    }
+    .pcard:hover .pcard-glow { opacity: 1; }
+
+    .pcard-img {
+      width: 100%; height: 300px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #0a0908, #141210);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pcard-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 1s var(--transition-smooth);
+    }
+    .pcard:hover .pcard-img img { transform: scale(1.1); }
+
+    .pcard-img .ph {
+      font-family: var(--font-serif); font-size: 5rem;
+      color: rgba(212,175,55,0.06); transition: all 1s var(--transition-smooth);
+    }
+    .pcard:hover .pcard-img .ph {
+      color: rgba(212,175,55,0.16);
+      transform: scale(1.2) rotate(8deg);
+      text-shadow: 0 0 60px rgba(212,175,55,0.12);
+    }
+    
+    /* 悬浮时的映射象形字 */
+    .pcard-img .hover-char {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif); font-size: 12rem;
+      color: rgba(212,175,55,0); pointer-events: none; z-index: 0;
+      transition: all 1.2s var(--transition-smooth);
+      filter: blur(8px);
+    }
+    .pcard:hover .pcard-img .hover-char {
+      color: rgba(212,175,55,0.05);
+      filter: blur(0px);
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .pcard-badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 4px 12px; background: rgba(231,76,60,0.9);
+      color: #fff; font-size: 0.72rem; font-weight: 600;
+      border-radius: 4px; z-index: 3;
+    }
+
+    .pcard-overlay {
+      position: absolute; inset: 0; z-index: 3;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 40%, transparent 70%);
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 20px; opacity: 0;
+      transition: all 0.5s var(--transition-smooth);
+    }
+    .pcard:hover .pcard-overlay { opacity: 1; }
+    .pcard-overlay-btns {
+      display: flex; gap: 10px;
+      transform: translateY(20px); opacity: 0;
+      transition: all 0.5s 0.1s var(--transition-smooth);
+    }
+    .pcard:hover .pcard-overlay-btns { transform: translateY(0); opacity: 1; }
+    .pcard-overlay-btns button {
+      flex: 1; padding: 10px; border-radius: 6px; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.3s;
+      border: 1px solid rgba(212,175,55,0.3);
+      background: rgba(212,175,55,0.08); color: var(--gold);
+    }
+    .pcard-overlay-btns button:hover { background: var(--gold); color: #000; }
+    .pcard-overlay-btns button.pbtn-main {
+      background: var(--gold); color: #000; border-color: var(--gold); font-weight: 600;
+    }
+    .pcard-overlay-btns button.pbtn-main:hover {
+      background: var(--gold-light); box-shadow: 0 5px 20px rgba(212,175,55,0.3);
+    }
+
+    .pcard-body { padding: 20px; position: relative; z-index: 2; }
+    .pcard-cat { font-size: 0.7rem; color: var(--gold); letter-spacing: 3px; margin-bottom: 8px; }
+    .pcard-name {
+      font-family: var(--font-serif); font-size: 1rem; font-weight: 600;
+      margin-bottom: 12px; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .pcard-foot { display: flex; justify-content: space-between; align-items: center; }
+    .pcard-price { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+    .pcard-price .old { font-size: 0.8rem; color: var(--text-muted); text-decoration: line-through; margin-left: 6px; font-weight: 400; }
+    .pcard-rating { font-size: 0.78rem; color: var(--text-secondary); }
+    .pcard-rating .stars { color: var(--gold); }
+
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 100px 20px; }
+    .empty-state .eicon { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
+    .empty-state h3 { font-family: var(--font-serif); margin-bottom: 12px; color: var(--text-secondary); }
+
+    .pagi { display: flex; justify-content: center; gap: 8px; margin-top: 50px; padding-bottom: 40px; }
+    .pagi button {
+      padding: 10px 18px; border: 1px solid var(--border-color); border-radius: 6px;
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+      transition: all 0.3s; font-size: 0.82rem;
+    }
+    .pagi button:hover, .pagi button.active {
+      background: var(--gold); border-color: var(--gold); color: #000;
+    }
+    .pagi button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    @media (max-width: 768px) {
+      .toolbar { flex-direction: column; align-items: flex-start; }
+      .pgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .pcard-img { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="nav-logo"><span class="logo-icon">甲</span><span>象形文创</span></a>
+    <ul class="nav-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/products.html" class="active">全部产品</a></li>
+      <li><a href="/oracle.html">甲骨文字馆</a></li>
+      <li><a href="/history.html">千年之旅</a></li>
+      <li><a href="/favorites.html">收藏</a></li>
+      <li><a href="/cart.html">购物车</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions">
+      <a href="/login.html" class="btn btn-ghost btn-sm">登录</a>
+      <a href="/register.html" class="btn btn-primary btn-sm">注册</a>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="section-label animate-on-scroll">COLLECTION</div>
+    <h1 class="animate-on-scroll">全部 <span class="gold-text">文创产品</span></h1>
+    <p class="animate-on-scroll delay-1">每一件文创产品，都是古老文明与现代美学的完美邂逅</p>
+  </section>
+
+  <main style="max-width:1400px; margin:0 auto; padding:0 40px;">
+    <div class="toolbar">
+      <div class="toolbar-cats" id="catChips">
+        <button class="cat-chip active" data-cat="全部" onclick="PP.filterCat('全部')">全部</button>
+      </div>
+      <div class="toolbar-right">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="搜索产品…">
+          <button onclick="PP.search()">🔍</button>
+        </div>
+        <select class="sort-sel" id="sortSel" onchange="PP.sort()">
+          <option value="">默认排序</option>
+          <option value="price_asc">价格 低→高</option>
+          <option value="price_desc">价格 高→低</option>
+          <option value="sales">销量优先</option>
+          <option value="rating">评分优先</option>
+          <option value="newest">最新上架</option>
+        </select>
+      </div>
+    </div>
+    <div class="result-info" id="resultInfo"></div>
+    <div class="pgrid" id="pgrid"></div>
+    <div class="pagi" id="pagi"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-main">
+      <div class="footer-bottom" style="border:none;padding-top:0;">
+        <span>© 2024 象形文创 · 传承华夏文明</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/animations.js"></script>
+  <script>
+    const ORACLE = ['龍','鳳','禾','鼎','壽','福','祿','喜','文','墨','書','道','藝','雅'];
+
+    const PP = {
+      cat: '全部', q: '', sortVal: '', page: 1, limit: 20,
+
+      async init() {
+        const params = new URLSearchParams(location.search);
+        this.cat = params.get('category') || '全部';
+        this.q = params.get('search') || '';
+        this.sortVal = params.get('sort') || '';
+        if (this.q) document.getElementById('searchInput').value = this.q;
+        if (this.sortVal) document.getElementById('sortSel').value = this.sortVal;
+        await this.loadCats();
+        await this.load();
+        document.getElementById('searchInput').addEventListener('keypress', e => {
+          if (e.key === 'Enter') this.search();
+        });
+      },
+
+            async loadCats() {
+        // 硬编码的兜底分类（确保一定有分类可选）
+        const fallbackCats = ['书法艺术','创意文具','服饰配件','篆刻艺术','生活器具','益智玩具','文房雅器','家居摆件','数码周边'];
+        
+        let categories = [];
+        
+        try {
+          const data = await API.getCategories();
+          if (data.categories && data.categories.length) {
+            categories = data.categories;
+          }
+        } catch(e) { 
+          console.error('分类加载失败，使用兜底分类:', e); 
+        }
+
+        // 如果 API 没返回分类，使用兜底
+        if (!categories.length) {
+          categories = fallbackCats;
+        }
+
+        const box = document.getElementById('catChips');
+        let html = `<button class="cat-chip ${this.cat==='全部'?'active':''}" data-cat="全部" onclick="PP.filterCat('全部')">全部</button>`;
+        categories.forEach(c => {
+          html += `<button class="cat-chip ${this.cat===c?'active':''}" data-cat="${c}" onclick="PP.filterCat('${c}')">${c}</button>`;
+        });
+        box.innerHTML = html;
+      },
+
+      async load() {
+        const grid = document.getElementById('pgrid');
+        grid.innerHTML = `<div class="empty-state"><div class="loader-oracle"></div><p style="color:var(--text-muted);margin-top:16px;">加载中…</p></div>`;
+
+        try {
+          const p = { page: this.page, limit: this.limit };
+          if (this.cat && this.cat !== '全部') p.category = this.cat;
+          if (this.q) p.search = this.q;
+          if (this.sortVal) p.sort = this.sortVal;
+
+          console.log('请求参数:', p);
+          const data = await API.getProducts(p);
+          console.log('返回数据:', data);
+
+          if (!data.products || data.products.length === 0) {
+            grid.innerHTML = `<div class="empty-state">
+              <div class="eicon">📦</div>
+              <h3>暂无产品</h3>
+              <p style="color:var(--text-muted);">试试其他分类或清除搜索条件</p>
+            </div>`;
+            document.getElementById('resultInfo').textContent = '共 0 件';
+            document.getElementById('pagi').innerHTML = '';
+            return;
+          }
+
+          document.getElementById('resultInfo').textContent =
+            `共 ${data.total} 件` +
+            (this.cat !== '全部' ? ` · ${this.cat}` : '') +
+            (this.q ? ` · "${this.q}"` : '');
+
+          grid.innerHTML = data.products.map((pr, i) => this.card(pr, i)).join('');
+          this.renderPagi(data.totalPages);
+
+          // 卡片光标追踪
+          grid.querySelectorAll('.pcard').forEach(card => {
+            card.addEventListener('mousemove', e => {
+              const r = card.getBoundingClientRect();
+              card.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+              card.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+            });
+          });
+
+          setTimeout(() => {
+            if (window.animEngine) window.animEngine.observeNewElements();
+            AnimationEngine.staggerCards(grid.querySelectorAll('.pcard'), 60);
+          }, 50);
+
+        } catch(err) {
+          console.error('加载错误:', err);
+          grid.innerHTML = `<div class="empty-state">
+            <div class="eicon">⚠️</div>
+            <h3>加载失败</h3>
+            <p style="color:var(--text-muted);">${err.message}</p>
+            <button class="btn btn-primary" onclick="PP.load()" style="margin-top:20px;">重试</button>
+          </div>`;
+        }
+      },
+
+      card(p, i) {
+        const disc = p.original_price > p.price ? Math.round((1-p.price/p.original_price)*100) : 0;
+        const stars = '★'.repeat(Math.floor(p.rating||5));
+        const ph = ORACLE[p.id % ORACLE.length];
+        const hoverCh = ORACLE[(p.id + 7) % ORACLE.length];
+
+        let img = '';
+        if (p.image && p.image.trim()) {
+          img = `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                 <div class="ph" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;">${ph}</div>`;
+        } else {
+          img = `<div class="ph">${ph}</div>`;
+        }
+
+        return `
+          <div class="pcard animate-on-scroll" onclick="location.href='/product-detail.html?id=${p.id}'">
+            <div class="pcard-glow"></div>
+            <div class="pcard-img">
+              <div class="hover-char">${hoverCh}</div>
+              ${img}
+              ${disc > 0 ? `<div class="pcard-badge">-${disc}%</div>` : ''}
+              <div class="pcard-overlay">
+                <div class="pcard-overlay-btns">
+                  <button class="pbtn-main" onclick="event.stopPropagation();qAdd(${p.id})">加入购物车</button>
+                  <button onclick="event.stopPropagation();qFav(${p.id})">♡ 收藏</button>
+                </div>
+              </div>
+            </div>
+            <div class="pcard-body">
+              <div class="pcard-cat">${p.category||'未分类'}</div>
+              <div class="pcard-name">${p.name}</div>
+              <div class="pcard-foot">
+                <div class="pcard-price">
+                  ¥${p.price}${p.original_price > p.price ? `<span class="old">¥${p.original_price}</span>` : ''}
+                </div>
+                <div class="pcard-rating"><span class="stars">${stars}</span> ${(p.rating||5).toFixed(1)}</div>
+              </div>
+            </div>
+          </div>`;
+      },
+
+      renderPagi(total) {
+        const box = document.getElementById('pagi');
+        if (total <= 1) { box.innerHTML = ''; return; }
+        let h = `<button ${this.page<=1?'disabled':''} onclick="PP.goPage(${this.page-1})">上一页</button>`;
+        for (let i=1;i<=total;i++) {
+          if (i===1||i===total||Math.abs(i-this.page)<=2) {
+            h += `<button class="${i===this.page?'active':''}" onclick="PP.goPage(${i})">${i}</button>`;
+          } else if (Math.abs(i-this.page)===3) {
+            h += `<button disabled>…</button>`;
+          }
+        }
+        h += `<button ${this.page>=total?'disabled':''} onclick="PP.goPage(${this.page+1})">下一页</button>`;
+        box.innerHTML = h;
+      },
+
+      filterCat(c) {
+        this.cat = c; 
+        this.page = 1;
+        
+        // 切换 active 状态
+        document.querySelectorAll('.cat-chip').forEach(ch => {
+          ch.classList.toggle('active', ch.dataset.cat === c);
+        });
+
+        // 给产品卡片加一个淡出动画
+        const grid = document.getElementById('pgrid');
+        const cards = grid.querySelectorAll('.pcard');
+        cards.forEach((card, i) => {
+          card.style.transition = 'opacity 0.3s, transform 0.3s';
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px) scale(0.95)';
+        });
+
+        // 等淡出完成后再加载新数据
+        setTimeout(() => {
+          this.load();
+        }, 300);
+
+        // 更新页面标题
+        const titleEl = document.querySelector('.page-hero h1');
+        if (titleEl) {
+          titleEl.innerHTML = c === '全部' 
+            ? '全部 <span class="gold-text">文创产品</span>' 
+            : `<span class="gold-text">${c}</span>`;
+        }
+      },
+      search() { this.q = document.getElementById('searchInput').value.trim(); this.page = 1; this.load(); },
+      sort() { this.sortVal = document.getElementById('sortSel').value; this.page = 1; this.load(); },
+      goPage(p) { this.page = p; this.load(); window.scrollTo({top:300,behavior:'smooth'}); }
+    };
+
+    async function qAdd(id) {
+      if (!Auth.requireLogin()) return;
+      try { await API.addToCart(id,1); showToast('已加入购物车 🛒','success'); }
+      catch(e) { showToast(e.message,'error'); }
+    }
+
+    async function qFav(id) {
+      if (!Auth.requireLogin()) return;
+      try { await API.addFavorite(id); showToast('已收藏 ♥','success'); }
+      catch(e) { showToast(e.message,'error'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => PP.init());
+  </script>
+</body>
+</html>

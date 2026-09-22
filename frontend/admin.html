@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 | 象形文创</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    /* 侧边栏 */
+    .admin-sidebar {
+      width: 240px; background: #080808; border-right: 1px solid var(--border-color);
+      padding: 24px 16px; display: flex; flex-direction: column;
+      position: fixed; top: 0; bottom: 0; left: 0; z-index: 100;
+    }
+    .admin-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-serif); font-size: 1rem; font-weight: 600;
+      padding: 8px 10px; margin-bottom: 32px;
+    }
+    .admin-logo .logo-icon {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--gold); border-radius: 6px;
+      font-size: 0.85rem; color: var(--gold);
+    }
+    .admin-nav { flex: 1; }
+    .admin-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 8px; margin-bottom: 4px;
+      font-size: 0.85rem; color: var(--text-secondary);
+      cursor: pointer; transition: all 0.3s; border: none; background: none; width: 100%; text-align: left;
+    }
+    .admin-nav-item:hover, .admin-nav-item.active {
+      background: rgba(212,175,55,0.06); color: var(--gold);
+    }
+    .admin-nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .admin-bottom a {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      font-size: 0.82rem; color: var(--text-muted); transition: color 0.3s; border-radius: 8px;
+    }
+    .admin-bottom a:hover { color: var(--gold); background: rgba(212,175,55,0.04); }
+
+    /* 主内容 */
+    .admin-main {
+      flex: 1; margin-left: 240px; padding: 30px 40px; min-height: 100vh;
+    }
+    .admin-page-title {
+      font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 30px;
+    }
+
+    /* 仪表盘统计 */
+    .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+    .dash-stat {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+      padding: 24px; transition: all 0.3s;
+    }
+    .dash-stat:hover { border-color: rgba(212,175,55,0.2); transform: translateY(-4px); }
+    .dash-stat-label { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 10px; }
+    .dash-stat-value { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 700; color: var(--gold); }
+
+    /* 表格 */
+    .admin-table-wrap {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+      overflow: hidden; margin-bottom: 30px;
+    }
+    .admin-table-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 24px; border-bottom: 1px solid var(--border-color);
+    }
+    .admin-table-header h3 { font-family: var(--font-serif); font-size: 1rem; }
+    .admin-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .admin-table th {
+      padding: 14px 20px; text-align: left; font-size: 0.72rem;
+      color: var(--text-muted); letter-spacing: 2px; border-bottom: 1px solid var(--border-color);
+      background: rgba(0,0,0,0.2);
+    }
+    .admin-table td {
+      padding: 14px 20px; font-size: 0.85rem; color: var(--text-secondary);
+      border-bottom: 1px solid rgba(212,175,55,0.03);
+    }
+    .admin-table tr:hover td { background: rgba(212,175,55,0.02); }
+
+    .admin-btn {
+      padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+      border: 1px solid var(--border-color); background: transparent;
+      color: var(--text-secondary); transition: all 0.3s;
+    }
+    .admin-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .admin-btn-danger:hover { border-color: #e74c3c; color: #e74c3c; }
+    .admin-btn-primary { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 600; }
+
+    /* 上架表单 */
+    .add-form {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 30px;
+    }
+    .add-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .add-form .form-group { margin-bottom: 0; }
+    .add-form label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 1px; }
+    .add-form input, .add-form select, .add-form textarea {
+      width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color); border-radius: 8px;
+      color: var(--text-primary); font-size: 0.88rem; outline: none;
+    }
+    .add-form input:focus, .add-form select:focus, .add-form textarea:focus { border-color: rgba(212,175,55,0.4); }
+    .add-form textarea { resize: vertical; min-height: 80px; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .status-badge {
+      padding: 3px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;
+    }
+    .status-pending { background: rgba(241,196,15,0.15); color: #f1c40f; }
+    .status-shipped { background: rgba(52,152,219,0.15); color: #3498db; }
+    .status-completed { background: rgba(39,174,96,0.15); color: #27ae60; }
+  </style>
+</head>
+<body>
+  <!-- 侧边栏 -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <span class="logo-icon">甲</span>
+      <span>象形文创</span>
+    </div>
+    <nav class="admin-nav">
+      <button class="admin-nav-item active" onclick="switchTab('dashboard',this)">
+        <span class="nav-icon">📊</span>仪表盘
+      </button>
+      <button class="admin-nav-item" onclick="switchTab('products',this)">
+        <span class="nav-icon">📦</span>产品管理
+      </button>
+      <button class="admin-nav-item" onclick="switchTab('addProduct',this)">
+        <span class="nav-icon">➕</span>上架新产品
+      </button>
+      <button class="admin-nav-item" onclick="switchTab('orders',this)">
+        <span class="nav-icon">📋</span>订单管理
+      </button>
+      <button class="admin-nav-item" onclick="switchTab('users',this)">
+        <span class="nav-icon">👥</span>用户管理
+      </button>
+    </nav>
+    <div class="admin-bottom">
+      <a href="/">← 返回前台</a>
+      <a href="javascript:Auth.logout()">⏻ 退出登录</a>
+    </div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="admin-main">
+    <!-- 仪表盘 -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <h2 class="admin-page-title">仪表盘</h2>
+      <div class="dash-stats" id="dashStats">
+        <div class="dash-stat"><div class="dash-stat-label">总产品</div><div class="dash-stat-value" id="statProducts">-</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">总用户</div><div class="dash-stat-value" id="statUsers">-</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">总订单</div><div class="dash-stat-value" id="statOrders">-</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">总收入</div><div class="dash-stat-value" id="statRevenue">-</div></div>
+      </div>
+      <div class="admin-table-wrap">
+        <div class="admin-table-header"><h3>热销产品</h3></div>
+        <table class="admin-table">
+          <thead><tr><th>产品</th><th>分类</th><th>价格</th><th>销量</th><th>库存</th></tr></thead>
+          <tbody id="topProductsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 产品管理 -->
+    <div class="tab-panel" id="tab-products">
+      <h2 class="admin-page-title">产品管理</h2>
+      <div class="admin-table-wrap">
+        <div class="admin-table-header"><h3>所有产品</h3></div>
+        <table class="admin-table">
+          <thead><tr><th>ID</th><th>名称</th><th>分类</th><th>价格</th><th>库存</th><th>操作</th></tr></thead>
+          <tbody id="allProductsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 上架产品 -->
+    <div class="tab-panel" id="tab-addProduct">
+      <h2 class="admin-page-title">上架新产品</h2>
+      <form class="add-form" id="addProductForm" onsubmit="addProduct(event)">
+        <div class="add-form-grid">
+          <div class="form-group"><label>产品名称 *</label><input type="text" id="apName" required></div>
+          <div class="form-group"><label>分类</label><input type="text" id="apCat" placeholder="如: 书法艺术"></div>
+          <div class="form-group"><label>售价 *</label><input type="number" id="apPrice" step="0.01" required></div>
+          <div class="form-group"><label>原价</label><input type="number" id="apOrigPrice" step="0.01"></div>
+          <div class="form-group"><label>库存 *</label><input type="number" id="apStock" required></div>
+          <div class="form-group"><label>精选推荐</label><select id="apFeatured"><option value="0">否</option><option value="1">是</option></select></div>
+        </div>
+        <div class="form-group" style="margin-top:20px;">
+          <label>产品描述</label><textarea id="apDesc" placeholder="产品描述…"></textarea>
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label>规格详情 (用 | 分隔)</label><input type="text" id="apDetails" placeholder="材质：xxx | 尺寸：xxx">
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label>产品图片</label><input type="file" id="apImage" accept="image/*" style="padding:8px;">
+        </div>
+        <button type="submit" class="admin-btn admin-btn-primary" style="margin-top:24px;padding:12px 32px;font-size:0.9rem;">上架产品</button>
+      </form>
+    </div>
+
+    <!-- 订单管理 -->
+    <div class="tab-panel" id="tab-orders">
+      <h2 class="admin-page-title">订单管理</h2>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>订单号</th><th>用户</th><th>金额</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 用户管理 -->
+    <div class="tab-panel" id="tab-users">
+      <h2 class="admin-page-title">用户管理</h2>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>角色</th><th>注册时间</th><th>操作</th></tr></thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // 权限检查
+    if (!Auth.isLoggedIn() || !Auth.isAdmin()) {
+      alert('需要管理员权限');
+      location.href = '/login.html';
+    }
+
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      if (btn) btn.classList.add('active');
+
+      if (tab === 'dashboard') loadDashboard();
+      if (tab === 'products') loadAllProducts();
+      if (tab === 'orders') loadOrders();
+      if (tab === 'users') loadUsers();
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await API.getDashboard();
+        document.getElementById('statProducts').textContent = data.stats.totalProducts;
+        document.getElementById('statUsers').textContent = data.stats.totalUsers;
+        document.getElementById('statOrders').textContent = data.stats.totalOrders;
+        document.getElementById('statRevenue').textContent = '¥' + data.stats.totalRevenue;
+
+        document.getElementById('topProductsBody').innerHTML = (data.topProducts || []).map(p => `
+          <tr>
+            <td>${p.name}</td><td>${p.category||'-'}</td>
+            <td style="color:var(--gold);">¥${p.price}</td>
+            <td>${p.sales||0}</td><td>${p.stock}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">暂无数据</td></tr>';
+      } catch(e) {
+        console.error('仪表盘:', e);
+        showToast('加载失败: ' + e.message, 'error');
+      }
+    }
+
+    async function loadAllProducts() {
+      try {
+        const data = await API.request('/api/admin/products', { headers: API.getHeaders() });
+        document.getElementById('allProductsBody').innerHTML = (data.products || []).map(p => `
+          <tr>
+            <td>#${p.id}</td><td>${p.name}</td><td>${p.category||'-'}</td>
+            <td style="color:var(--gold);">¥${p.price}</td><td>${p.stock}</td>
+            <td><button class="admin-btn admin-btn-danger" onclick="deleteProduct(${p.id})">删除</button></td>
+          </tr>
+        `).join('');
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function loadOrders() {
+      try {
+        const data = await API.getAdminOrders();
+        const statusMap = { pending:'待发货', shipped:'已发货', completed:'已完成', cancelled:'已取消' };
+        const statusClass = { pending:'status-pending', shipped:'status-shipped', completed:'status-completed' };
+        document.getElementById('ordersBody').innerHTML = (data.orders || []).map(o => `
+          <tr>
+            <td>#${o.id}</td><td>${o.username||'未知'}</td>
+            <td style="color:var(--gold);">¥${o.total_amount}</td>
+            <td><span class="status-badge ${statusClass[o.status]||''}">${statusMap[o.status]||o.status}</span></td>
+            <td>${new Date(o.created_at).toLocaleDateString()}</td>
+            <td>
+              <select onchange="updateOrderStatus(${o.id},this.value)" style="background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:4px;padding:4px 8px;font-size:0.75rem;">
+                <option value="pending" ${o.status==='pending'?'selected':''}>待发货</option>
+                <option value="shipped" ${o.status==='shipped'?'selected':''}>已发货</option>
+                <option value="completed" ${o.status==='completed'?'selected':''}>已完成</option>
+              </select>
+            </td>
+          </tr>
+        `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">暂无订单</td></tr>';
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function loadUsers() {
+      try {
+        const data = await API.getAdminUsers();
+        document.getElementById('usersBody').innerHTML = (data.users || []).map(u => `
+          <tr>
+            <td>#${u.id}</td><td>${u.username}</td><td>${u.email}</td>
+            <td><span style="color:${u.role==='admin'?'var(--gold)':'var(--text-muted)'}">${u.role}</span></td>
+            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+            <td>${u.role!=='admin'?`<button class="admin-btn admin-btn-danger" onclick="deleteUser(${u.id})">删除</button>`:''}</td>
+          </tr>
+        `).join('');
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function addProduct(e) {
+      e.preventDefault();
+      const form = new FormData();
+      form.append('name', document.getElementById('apName').value);
+      form.append('category', document.getElementById('apCat').value);
+      form.append('price', document.getElementById('apPrice').value);
+      form.append('original_price', document.getElementById('apOrigPrice').value || document.getElementById('apPrice').value);
+      form.append('stock', document.getElementById('apStock').value);
+      form.append('featured', document.getElementById('apFeatured').value);
+      form.append('description', document.getElementById('apDesc').value);
+      form.append('details', document.getElementById('apDetails').value);
+      const imageFile = document.getElementById('apImage').files[0];
+      if (imageFile) form.append('image', imageFile);
+
+      try {
+        await API.addProduct(form);
+        showToast('产品上架成功！', 'success');
+        document.getElementById('addProductForm').reset();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('确定删除此产品？')) return;
+      try {
+        await API.deleteProduct(id);
+        showToast('已删除', 'info');
+        loadAllProducts();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function updateOrderStatus(id, status) {
+      try {
+        await API.updateOrderStatus(id, status);
+        showToast('状态已更新', 'success');
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('确定删除此用户？')) return;
+      try {
+        await API.deleteUser(id);
+        showToast('用户已删除', 'info');
+        loadUsers();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    // 初始化
+    loadDashboard();
+  </script>
+</body>
+</html>

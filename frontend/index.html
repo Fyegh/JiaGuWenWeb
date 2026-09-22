@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>象形文创 | 传承华夏文明</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ===== 加载页 ===== */
+    .ld-screen{position:fixed;inset:0;z-index:100000;background:#030303;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s,visibility .8s}
+    .ld-screen.out{opacity:0;visibility:hidden;pointer-events:none}
+    .ld-char{font-family:var(--font-serif);font-size:3.5rem;color:var(--gold);animation:ldP 1.5s ease-in-out infinite}
+    @keyframes ldP{0%,100%{opacity:.3;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+    .ld-text{font-size:.7rem;letter-spacing:8px;color:var(--text-muted);margin-top:20px}
+    .ld-bar{width:80px;height:1px;background:rgba(212,175,55,.08);margin-top:16px;position:relative;overflow:hidden}
+    .ld-bar::after{content:'';position:absolute;left:-40%;width:40%;height:100%;background:var(--gold);animation:ldB 1s ease-in-out infinite}
+    @keyframes ldB{0%{left:-40%}100%{left:100%}}
+
+    /* ===== 全局光标 ===== */
+    .g-glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,.05) 0%,rgba(212,175,55,.015) 35%,transparent 70%);pointer-events:none;transform:translate(-50%,-50%);transition:left .1s linear,top .1s linear;z-index:1;mix-blend-mode:screen}
+
+    /* ===== 噪点 ===== */
+    .grain{position:fixed;inset:0;pointer-events:none;z-index:99998;opacity:.03;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+    /* ===== HERO ===== */
+    .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#030303}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(212,175,55,.01) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,.01) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,black 20%,transparent 80%)}
+    .speed-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .speed-line{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(212,175,55,.06),transparent);animation:speedLine var(--dur) linear infinite;left:var(--x);top:-20%;height:30%}
+    @keyframes speedLine{0%{transform:translateY(-100%);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateY(500%);opacity:0}}
+    .float-chars{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .fc{position:absolute;font-family:var(--font-serif);color:rgba(212,175,55,.01);user-select:none;transition:color 1.5s,text-shadow 1.5s,transform 1.5s}
+    .fc.lit{color:rgba(212,175,55,.08)!important;text-shadow:0 0 80px rgba(212,175,55,.12),0 0 180px rgba(212,175,55,.03);transform:scale(1.08)!important}
+
+    .hero-content{position:relative;z-index:10;text-align:center;padding:0 20px;max-width:940px}
+    .hero-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 26px;border:1px solid rgba(212,175,55,.1);border-radius:50px;font-size:.76rem;color:var(--text-muted);letter-spacing:5px;margin-bottom:44px;opacity:0;animation:fadeInDown 1s .8s cubic-bezier(.16,1,.3,1) forwards;backdrop-filter:blur(4px)}
+    .hero-badge .dot{width:5px;height:5px;background:var(--gold);border-radius:50%;animation:dotP 2s ease-in-out infinite}
+    @keyframes dotP{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.8)}}
+
+    .hero-title{font-family:var(--font-serif);font-weight:700;line-height:1.1;margin-bottom:16px;opacity:0;animation:fadeInUp 1s 1s cubic-bezier(.16,1,.3,1) forwards}
+    .hero-title .l1{font-size:clamp(2.8rem,7vw,5.5rem);display:block;margin-bottom:6px;letter-spacing:6px}
+    .hero-title .l2{font-size:clamp(3rem,8vw,6.2rem);display:block;background:linear-gradient(135deg,#d4af37 0%,#f0d060 30%,#d4af37 60%,#c49b20 100%);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 5s ease-in-out infinite}
+    @keyframes goldShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+    .hero-sub{font-family:var(--font-serif);font-size:clamp(1rem,2vw,1.4rem);color:var(--text-secondary);letter-spacing:10px;margin-bottom:32px;opacity:0;animation:fadeInUp 1s 1.15s cubic-bezier(.16,1,.3,1) forwards}
+    .hero-desc{font-size:1rem;color:var(--text-muted);line-height:2;max-width:520px;margin:0 auto 52px;opacity:0;animation:fadeInUp 1s 1.3s cubic-bezier(.16,1,.3,1) forwards}
+    .hero-actions{display:flex;gap:18px;justify-content:center;align-items:center;opacity:0;animation:fadeInUp 1s 1.5s cubic-bezier(.16,1,.3,1) forwards}
+
+    .hbtn{display:inline-flex;align-items:center;gap:10px;padding:17px 42px;border-radius:8px;font-size:.92rem;font-weight:500;letter-spacing:3px;cursor:pointer;transition:all .5s cubic-bezier(.16,1,.3,1);text-decoration:none;position:relative;overflow:hidden}
+    .hbtn-p{background:var(--gold);color:#000;border:1px solid var(--gold)}
+    .hbtn-p::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .6s}
+    .hbtn-p::after{content:'';position:absolute;inset:-2px;border-radius:10px;background:var(--gold);opacity:0;filter:blur(12px);transition:opacity .4s;z-index:-1}
+    .hbtn-p:hover{transform:translateY(-3px);box-shadow:0 12px 44px rgba(212,175,55,.4)}
+    .hbtn-p:hover::before{left:100%}
+    .hbtn-p:hover::after{opacity:.3}
+    .hbtn-g{background:transparent;color:var(--text-secondary);border:1px solid rgba(212,175,55,.12)}
+    .hbtn-g:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px);box-shadow:0 10px 40px rgba(212,175,55,.08)}
+    .hbtn-g .arr{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.2);border-radius:50%;font-size:.6rem;transition:all .3s}
+    .hbtn-g:hover .arr{border-color:var(--gold);background:rgba(212,175,55,.1);transform:translateX(4px)}
+
+    .hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);text-align:center;z-index:10;opacity:0;animation:fadeInUp 1s 2s cubic-bezier(.16,1,.3,1) forwards}
+    .hero-scroll span{display:block;font-size:.6rem;letter-spacing:5px;color:var(--text-muted);margin-bottom:10px}
+    .scroll-mouse{width:18px;height:28px;border:1px solid rgba(212,175,55,.2);border-radius:9px;margin:0 auto;position:relative}
+    .scroll-mouse::after{content:'';width:2px;height:6px;background:var(--gold);border-radius:1px;position:absolute;top:5px;left:50%;transform:translateX(-50%);animation:scrollA 2s ease-in-out infinite}
+    @keyframes scrollA{0%{top:5px;opacity:1}100%{top:16px;opacity:0}}
+
+    /* ===== 统计条 ===== */
+    .stats-bar{padding:65px 0;border-bottom:1px solid var(--border-color);background:#050505}
+    .stats-grid{max-width:1200px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+    .stat-num{font-family:var(--font-serif);font-size:2.8rem;font-weight:700;color:var(--gold);margin-bottom:8px}
+    .stat-label{font-size:.75rem;color:var(--text-muted);letter-spacing:3px}
+
+    /* ===== 通用区域 ===== */
+    .sec{padding:120px 0;position:relative}
+    .sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 800px 400px at 50% 30%,rgba(212,175,55,.02) 0%,transparent 70%);pointer-events:none}
+    .sec-hd{text-align:center;margin-bottom:70px}
+    .sec-label{font-size:.7rem;letter-spacing:6px;color:var(--gold);margin-bottom:16px;text-transform:uppercase}
+    .sec-title{font-family:var(--font-serif);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;line-height:1.3}
+    .sec-div{width:50px;height:1px;background:var(--gold);margin:20px auto}
+    .sec-desc{font-size:.95rem;color:var(--text-secondary);max-width:600px;margin:0 auto;line-height:1.8}
+
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+        /* =============================================
+       千年之旅 · 终极升级版
+       ============================================= */
+    .history-sec{padding:0;position:relative;overflow:hidden;background:#020202}
+
+    .hs-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .hs-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(212,175,55,.006) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,.006) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 80% 70% at 50% 40%,black 10%,transparent 75%)}
+    .hs-radial{position:absolute;inset:0;background:radial-gradient(ellipse 1000px 600px at 50% 20%,rgba(212,175,55,.025) 0%,transparent 70%),radial-gradient(ellipse 600px 400px at 20% 70%,rgba(212,175,55,.012) 0%,transparent 70%),radial-gradient(ellipse 600px 400px at 80% 80%,rgba(212,175,55,.012) 0%,transparent 70%)}
+    .hs-oracles .hs-float-char{position:absolute;font-family:var(--font-serif);color:rgba(212,175,55,.005);transition:all 2.5s cubic-bezier(.16,1,.3,1);will-change:color,text-shadow,transform}
+    .hs-oracles .hs-float-char.lit{color:rgba(212,175,55,.04)!important;text-shadow:0 0 120px rgba(212,175,55,.06)}
+    .hs-lines .hs-speed-line{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(212,175,55,.025),transparent);animation:hsLineMove var(--dur) linear infinite;left:var(--lx);top:-20%;height:25%}
+    @keyframes hsLineMove{0%{transform:translateY(-100%);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(500%);opacity:0}}
+    .hs-particles{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .hs-particle{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;opacity:0;animation:hsParticle var(--pd) ease-in-out infinite;animation-delay:var(--delay)}
+    @keyframes hsParticle{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:.3}50%{opacity:.15;transform:translateY(-60px) scale(1)}80%{opacity:.05}100%{opacity:0;transform:translateY(-120px) scale(0)}}
+
+    .hs-header-zone{padding:140px 0 80px;position:relative;z-index:5}
+    .hs-header-zone .sec-hd{margin-bottom:0}
+    .hs-sub-intro{max-width:800px;margin:24px auto 0;padding:0 40px;text-align:center;font-size:.88rem;color:var(--text-muted);line-height:2}
+    .hs-sub-intro strong{color:var(--gold);font-weight:500}
+
+    .hs-stats{display:flex;justify-content:center;align-items:center;gap:0;max-width:960px;margin:50px auto 0;padding:0;position:relative;z-index:5}
+    .hs-stat{flex:1;text-align:center;padding:28px 16px;position:relative;transition:all .5s cubic-bezier(.16,1,.3,1);cursor:default}
+    .hs-stat::before{content:'';position:absolute;inset:0;background:rgba(212,175,55,.02);border-radius:12px;opacity:0;transition:opacity .5s;pointer-events:none}
+    .hs-stat:hover::before{opacity:1}
+    .hs-stat:hover{transform:translateY(-4px)}
+    .hs-stat-icon{font-size:1.6rem;margin-bottom:10px;display:inline-block;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+    .hs-stat:hover .hs-stat-icon{transform:scale(1.2) rotate(-8deg)}
+    .hs-stat-num{font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:4px;transition:text-shadow .5s}
+    .hs-stat:hover .hs-stat-num{text-shadow:0 0 30px rgba(212,175,55,.3)}
+    .hs-stat-label{font-size:.68rem;color:var(--text-muted);letter-spacing:2px}
+    .hs-stat-divider{width:1px;height:50px;background:linear-gradient(to bottom,transparent,rgba(212,175,55,.12),transparent);flex-shrink:0}
+    .hs-stat-bar{width:40px;height:3px;background:rgba(212,175,55,.06);border-radius:2px;margin:10px auto 0;overflow:hidden}
+    .hs-stat-bar-fill{height:100%;background:var(--gold);border-radius:2px;width:0;transition:width 1.8s cubic-bezier(.16,1,.3,1)}
+    .hs-stat.counted .hs-stat-bar-fill{width:100%}
+
+    .hs-divider{display:flex;align-items:center;justify-content:center;gap:16px;padding:30px 0 10px;position:relative;z-index:5}
+    .hs-divider-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.2),transparent)}
+    .hs-divider-dot{width:6px;height:6px;border:1px solid rgba(212,175,55,.3);border-radius:50%;animation:hsDivPulse 2s ease-in-out infinite}
+    @keyframes hsDivPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+
+    .hs-timeline{position:relative;max-width:1200px;margin:0 auto;padding:40px 40px 20px;z-index:5}
+    .hs-axis{position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:rgba(212,175,55,.04);z-index:1;border-radius:1px}
+    .hs-axis::before,.hs-axis::after{content:'';position:absolute;left:50%;transform:translateX(-50%);width:8px;height:8px;border:1.5px solid rgba(212,175,55,.2);border-radius:50%}
+    .hs-axis::before{top:-4px}
+    .hs-axis::after{bottom:-4px}
+    .hs-axis-fill{position:absolute;top:0;left:0;width:100%;height:0;background:linear-gradient(to bottom,var(--gold),rgba(212,175,55,.4),rgba(212,175,55,.1));transition:height .05s linear;border-radius:1px;box-shadow:0 0 8px rgba(212,175,55,.4),0 0 24px rgba(212,175,55,.1)}
+    .hs-axis-glow{position:absolute;left:50%;width:20px;height:20px;transform:translate(-50%,0);background:radial-gradient(circle,rgba(212,175,55,.4) 0%,transparent 70%);border-radius:50%;opacity:0;transition:opacity .3s;pointer-events:none}
+
+    .hs-node{display:flex;align-items:flex-start;margin-bottom:70px;position:relative}
+    .hs-node:last-child{margin-bottom:20px}
+    .hs-node-content{flex:1;z-index:3}
+    .hs-node-spacer{flex:1}
+    .hs-node-dot{position:relative;width:80px;flex-shrink:0;display:flex;align-items:center;justify-content:center;z-index:4;padding-top:28px}
+    .hs-dot-ring{width:44px;height:44px;border:1.5px solid rgba(212,175,55,.1);border-radius:50%;position:absolute;animation:hsDotPulse 3s ease-in-out infinite;opacity:.4}
+    .hs-dot-ring-2{width:60px;height:60px;border:1px solid rgba(212,175,55,.04);border-radius:50%;position:absolute;animation:hsDotPulse 3s .5s ease-in-out infinite;opacity:.2}
+    @keyframes hsDotPulse{0%,100%{transform:scale(1);opacity:.2}50%{transform:scale(1.6);opacity:0}}
+    .hs-dot-core{width:14px;height:14px;border:2.5px solid rgba(212,175,55,.35);border-radius:50%;background:#030303;transition:all .6s cubic-bezier(.16,1,.3,1);position:relative;z-index:2}
+    .hs-node:hover .hs-dot-core,.hs-node.visible .hs-dot-core{background:var(--gold);border-color:var(--gold);box-shadow:0 0 16px rgba(212,175,55,.6),0 0 40px rgba(212,175,55,.15);transform:scale(1.2)}
+    .hs-dot-year{position:absolute;top:calc(100% + 10px);white-space:nowrap;font-family:var(--font-serif);font-size:.72rem;color:var(--text-muted);letter-spacing:1px;opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1);transform:translateY(-6px)}
+    .hs-node:hover .hs-dot-year,.hs-node.visible .hs-dot-year{opacity:1;transform:translateY(0);color:var(--gold)}
+
+    .hs-connector{position:absolute;top:38px;height:1px;background:linear-gradient(90deg,rgba(212,175,55,.15),rgba(212,175,55,.03));width:0;transition:width .8s cubic-bezier(.16,1,.3,1) .2s}
+    .hs-left .hs-connector{right:50px;direction:rtl;background:linear-gradient(270deg,rgba(212,175,55,.15),rgba(212,175,55,.03))}
+    .hs-right .hs-connector{left:50px}
+    .hs-node.visible .hs-connector{width:40px}
+
+    .hs-card{background:rgba(8,8,8,.8);border:1px solid rgba(212,175,55,.05);border-radius:18px;padding:34px;position:relative;overflow:hidden;transition:all .7s cubic-bezier(.16,1,.3,1);backdrop-filter:blur(8px)}
+    .hs-card::before{content:attr(data-oracle);position:absolute;bottom:-10px;right:16px;font-family:var(--font-serif);font-size:9rem;color:rgba(212,175,55,.012);line-height:1;transition:all 1.2s cubic-bezier(.16,1,.3,1);pointer-events:none}
+    .hs-card:hover::before{color:rgba(212,175,55,.05);transform:scale(1.12) rotate(6deg) translateY(-8px);text-shadow:0 0 80px rgba(212,175,55,.04)}
+    .hs-card:hover{border-color:rgba(212,175,55,.18);transform:translateY(-8px) scale(1.01);box-shadow:0 24px 70px rgba(0,0,0,.45),0 0 50px rgba(212,175,55,.04),inset 0 1px 0 rgba(212,175,55,.08)}
+    .hs-card-glow{position:absolute;inset:0;opacity:0;transition:opacity .6s;background:radial-gradient(circle at var(--cx,50%) var(--cy,50%),rgba(212,175,55,.06) 0%,transparent 50%);pointer-events:none;z-index:0}
+    .hs-card:hover .hs-card-glow{opacity:1}
+    .hs-card-highlight{border-color:rgba(212,175,55,.1)}
+    .hs-card-highlight::after{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4}
+    .hs-card-inner{position:relative;z-index:1;opacity:0;transform:translateY(16px);transition:all .7s .15s cubic-bezier(.16,1,.3,1)}
+    .hs-node.visible .hs-card-inner{opacity:1;transform:translateY(0)}
+
+    .hs-card-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .hs-era-badge{padding:5px 16px;border:1px solid rgba(212,175,55,.12);border-radius:50px;font-size:.68rem;color:var(--text-muted);letter-spacing:2px;transition:all .4s;background:rgba(212,175,55,.02)}
+    .hs-era-highlight{border-color:rgba(212,175,55,.25);color:var(--gold);background:rgba(212,175,55,.04)}
+    .hs-card:hover .hs-era-badge{border-color:rgba(212,175,55,.3);color:var(--gold)}
+    .hs-year-large{font-family:var(--font-serif);font-size:.88rem;color:var(--text-secondary);letter-spacing:1px}
+    .hs-card-title{font-family:var(--font-serif);font-size:1.35rem;font-weight:700;margin-bottom:14px;transition:all .5s;line-height:1.4;position:relative;display:inline-block}
+    .hs-card-title::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transition:width .6s cubic-bezier(.16,1,.3,1)}
+    .hs-card:hover .hs-card-title{color:var(--gold)}
+    .hs-card:hover .hs-card-title::after{width:100%}
+    .hs-card-desc{font-size:.88rem;color:var(--text-muted);line-height:2.1;margin-bottom:18px}
+    .hs-card-desc strong{color:var(--gold);font-weight:500}
+    .hs-key-data{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;margin:4px 2px;background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.08);border-radius:6px;font-family:var(--font-serif);font-size:.82rem;color:var(--gold);transition:all .3s;cursor:default}
+    .hs-key-data:hover{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.2);transform:translateY(-2px)}
+    .hs-key-data .kd-icon{font-size:.9rem}
+    .hs-card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+    .hs-tag{padding:4px 12px;border:1px solid rgba(212,175,55,.06);border-radius:5px;font-size:.68rem;color:var(--text-muted);letter-spacing:1px;transition:all .35s;cursor:default}
+    .hs-card:hover .hs-tag{border-color:rgba(212,175,55,.15);color:var(--text-secondary)}
+    .hs-tag:hover{border-color:var(--gold)!important;color:var(--gold)!important;background:rgba(212,175,55,.04);transform:translateY(-1px)}
+    .hs-card-footer{padding-top:14px;border-top:1px solid rgba(212,175,55,.04);display:flex;align-items:center;justify-content:space-between}
+    .hs-card-more{font-size:.75rem;color:var(--text-muted);letter-spacing:2px;transition:all .3s;display:flex;align-items:center;gap:6px}
+    .hs-card:hover .hs-card-more{color:var(--gold)}
+    .hs-card-more .arrow{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.1);border-radius:50%;font-size:.6rem;transition:all .4s}
+    .hs-card:hover .hs-card-more .arrow{border-color:var(--gold);background:rgba(212,175,55,.08);transform:translateX(3px)}
+    .hs-card-era-icon{font-size:1.4rem;opacity:.4;transition:all .5s}
+    .hs-card:hover .hs-card-era-icon{opacity:.8;transform:scale(1.1)}
+
+    .hs-left .hs-node-content{padding-right:0}
+    .hs-left .hs-card{text-align:left}
+    .hs-right .hs-node-content{padding-left:0}
+
+    .hs-bottom{max-width:860px;margin:50px auto 0;padding:0 40px 120px;text-align:center;position:relative;z-index:5}
+    .hs-quote{background:rgba(10,10,10,.6);border:1px solid rgba(212,175,55,.06);border-radius:16px;padding:40px 48px;margin-bottom:40px;position:relative;backdrop-filter:blur(8px);transition:all .5s cubic-bezier(.16,1,.3,1)}
+    .hs-quote:hover{border-color:rgba(212,175,55,.15);transform:translateY(-4px);box-shadow:0 16px 50px rgba(0,0,0,.3)}
+    .hs-quote-mark{position:absolute;top:16px;left:28px;font-family:serif;font-size:4.5rem;color:rgba(212,175,55,.06);line-height:1;pointer-events:none}
+    .hs-quote p{font-family:var(--font-serif);font-size:.95rem;color:var(--text-secondary);line-height:2.2;padding-left:20px}
+    .hs-quote p strong{color:var(--gold);font-weight:600}
+    .hs-cta-group{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .hs-cta-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border:1px solid rgba(212,175,55,.12);border-radius:8px;color:var(--text-secondary);font-size:.88rem;letter-spacing:3px;text-decoration:none;transition:all .5s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;background:transparent}
+    .hs-cta-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(212,175,55,.06),transparent);transition:left .6s}
+    .hs-cta-btn:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px);box-shadow:0 10px 40px rgba(212,175,55,.1)}
+    .hs-cta-btn:hover::before{left:100%}
+    .hs-cta-btn-primary{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+    .hs-cta-btn-primary::after{content:'';position:absolute;inset:-2px;border-radius:10px;background:var(--gold);opacity:0;filter:blur(14px);z-index:-1;transition:opacity .4s}
+    .hs-cta-btn-primary:hover{background:#e8c84a;color:#000;box-shadow:0 12px 44px rgba(212,175,55,.4)}
+    .hs-cta-btn-primary:hover::after{opacity:.25}
+    .hs-cta-arrow{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.15);border-radius:50%;font-size:.7rem;transition:all .4s}
+    .hs-cta-btn:hover .hs-cta-arrow{border-color:var(--gold);background:rgba(212,175,55,.1);transform:translateX(4px)}
+    .hs-cta-btn-primary .hs-cta-arrow{border-color:rgba(0,0,0,.15)}
+
+    @media(max-width:1024px){.hs-timeline{padding:40px 20px 20px}.hs-axis{left:28px}.hs-node{flex-direction:column!important;padding-left:60px}.hs-node-dot{position:absolute;left:0;top:20px;width:56px;padding-top:0}.hs-node-spacer{display:none}.hs-left .hs-node-content,.hs-right .hs-node-content{text-align:left;padding:0}.hs-dot-year{left:calc(100% + 6px);top:50%;transform:translateY(-50%)!important}.hs-node:hover .hs-dot-year,.hs-node.visible .hs-dot-year{transform:translateY(-50%) translateX(3px)!important}.hs-connector{display:none}}
+    @media(max-width:768px){.hs-stats{flex-direction:column;gap:8px;padding:0 20px}.hs-stat{padding:16px}.hs-stat-divider{width:50px;height:1px}.hs-header-zone{padding:110px 0 50px}.hs-bottom{padding:0 20px 80px}.hs-quote{padding:28px}.hs-card{padding:24px}.hs-cta-group{flex-direction:column;align-items:center}.stats-grid{grid-template-columns:repeat(2,1fr);gap:20px}.hero-actions{flex-direction:column}}
+        /* ===== 甲骨文展示 ===== */
+    .oracle-showcase{max-width:1400px;margin:0 auto;padding:0 40px}
+    .oracle-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+    .os-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .6s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+    .os-card:hover{transform:translateY(-8px) scale(1.03);border-color:var(--gold);box-shadow:0 20px 50px rgba(0,0,0,.3),0 0 30px rgba(212,175,55,.06)}
+    .os-card .os-glow{position:absolute;inset:0;opacity:0;transition:opacity .5s;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(212,175,55,.08) 0%,transparent 55%);pointer-events:none}
+    .os-card:hover .os-glow{opacity:1}
+    .os-card-img{width:80px;height:80px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.3)}
+    .os-card-img img{width:100%;height:100%;object-fit:contain;padding:8px;transition:transform .8s cubic-bezier(.16,1,.3,1),filter .5s;filter:brightness(.85)}
+    .os-card:hover .os-card-img img{transform:scale(1.15);filter:brightness(1.15)}
+    .os-card-char{font-family:var(--font-serif);font-size:2rem;color:rgba(212,175,55,.08);transition:all .8s}
+    .os-card:hover .os-card-char{color:rgba(212,175,55,.25);transform:scale(1.15) rotate(5deg);text-shadow:0 0 40px rgba(212,175,55,.15)}
+    .os-hanzi{font-family:var(--font-serif);font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:4px;transition:transform .3s}
+    .os-card:hover .os-hanzi{transform:scale(1.1)}
+    .os-pinyin{font-size:.78rem;color:var(--text-muted);letter-spacing:1px}
+        /* =============================================
+       甲骨文字 · 无限流动版
+       ============================================= */
+    .oracle-flow-sec{padding:120px 0 100px;position:relative;overflow:hidden;background:#020202}
+
+    /* 背景 */
+    .of-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .of-radial{position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 900px 500px at 50% 40%,rgba(212,175,55,.018) 0%,transparent 70%),
+        radial-gradient(ellipse 500px 300px at 10% 50%,rgba(212,175,55,.008) 0%,transparent 70%),
+        radial-gradient(ellipse 500px 300px at 90% 50%,rgba(212,175,55,.008) 0%,transparent 70%)}
+    .of-noise{position:absolute;inset:0;opacity:.015;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+    /* 头部 */
+    .of-header{text-align:center;margin-bottom:50px;position:relative;z-index:5}
+    .of-label{font-size:.62rem;letter-spacing:10px;color:rgba(212,175,55,.35);margin-bottom:14px;font-weight:500}
+    .of-title{font-family:var(--font-serif);font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:800;letter-spacing:4px;margin-bottom:14px}
+    .of-gold{background:linear-gradient(135deg,var(--gold),#f0d060,var(--gold));background-size:200% 100%;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:ofGoldShine 4s ease-in-out infinite}
+    @keyframes ofGoldShine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .of-div{display:flex;justify-content:center;margin-bottom:18px}
+    .of-div span{display:block;width:50px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+    .of-subtitle{font-size:.88rem;color:var(--text-muted);letter-spacing:2px}
+
+    /* 流动区域 */
+    .of-marquee-zone{position:relative;z-index:5;padding:10px 0;overflow:hidden}
+
+    /* 扫描线 */
+    .of-scanline{position:absolute;top:0;bottom:0;width:200px;z-index:10;pointer-events:none;
+      background:linear-gradient(90deg,transparent,rgba(212,175,55,.04),rgba(212,175,55,.06),rgba(212,175,55,.04),transparent);
+      animation:ofScan 6s linear infinite}
+    @keyframes ofScan{0%{left:-200px}100%{left:calc(100% + 200px)}}
+
+    /* 左右渐隐 */
+    .of-fade{position:absolute;top:0;bottom:0;width:180px;z-index:8;pointer-events:none}
+    .of-fade-l{left:0;background:linear-gradient(90deg,#020202 0%,#020202 10%,transparent 100%)}
+    .of-fade-r{right:0;background:linear-gradient(270deg,#020202 0%,#020202 10%,transparent 100%)}
+
+    /* 行 */
+    .of-row{position:relative;overflow:hidden;padding:8px 0}
+    .of-track{display:flex;gap:14px;width:max-content;will-change:transform}
+
+    /* 单个文字卡片 */
+    .of-char{width:108px;height:136px;flex-shrink:0;
+      background:rgba(10,10,10,.7);border:1px solid rgba(212,175,55,.04);border-radius:12px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+      backdrop-filter:blur(4px);transition:all .5s cubic-bezier(.16,1,.3,1);cursor:pointer;
+      position:relative;overflow:hidden;padding:10px 8px 8px}
+    .of-char::before{content:'';position:absolute;inset:0;
+      background:radial-gradient(circle at 50% 35%,rgba(212,175,55,.03) 0%,transparent 70%);
+      opacity:0;transition:opacity .5s;pointer-events:none}
+    .of-char:hover{border-color:rgba(212,175,55,.3);transform:translateY(-8px) scale(1.08)!important;
+      box-shadow:0 16px 40px rgba(0,0,0,.4),0 0 30px rgba(212,175,55,.06);z-index:20}
+    .of-char:hover::before{opacity:1}
+    .of-char::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;
+      transition:opacity .4s;border-radius:1px}
+    .of-char:hover::after{opacity:.5}
+
+    .of-char-oracle{width:42px;height:42px;color:rgba(212,175,55,.15);
+      transition:all .6s cubic-bezier(.16,1,.3,1);line-height:1;flex-shrink:0}
+    .of-char:hover .of-char-oracle{color:var(--gold);filter:drop-shadow(0 0 20px rgba(212,175,55,.4));transform:scale(1.15)}
+
+    .of-char-modern{font-family:var(--font-serif);font-size:.82rem;color:var(--text-secondary);
+      transition:color .4s;font-weight:600}
+    .of-char:hover .of-char-modern{color:var(--gold)}
+
+    .of-char-pinyin{font-size:.58rem;color:var(--text-muted);letter-spacing:1px;transition:color .4s}
+    .of-char:hover .of-char-pinyin{color:rgba(212,175,55,.6)}
+
+    /* 发光尾迹（每张卡片hover时） */
+    .of-char::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;
+      transition:opacity .4s;border-radius:1px}
+    .of-char:hover::after{opacity:.5}
+
+    /* CTA */
+    .of-cta{text-align:center;margin-top:50px;position:relative;z-index:5}
+    .of-cta-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;
+      background:transparent;border:1px solid rgba(212,175,55,.12);border-radius:8px;
+      color:var(--text-secondary);font-size:.88rem;letter-spacing:3px;text-decoration:none;
+      transition:all .5s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+    .of-cta-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(212,175,55,.06),transparent);transition:left .6s}
+    .of-cta-btn:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px);
+      box-shadow:0 10px 40px rgba(212,175,55,.1)}
+    .of-cta-btn:hover::before{left:100%}
+    .of-cta-arrow{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;
+      border:1px solid rgba(212,175,55,.15);border-radius:50%;font-size:.7rem;transition:all .4s}
+    .of-cta-btn:hover .of-cta-arrow{border-color:var(--gold);background:rgba(212,175,55,.1);transform:translateX(4px)}
+
+    /* hover暂停 */
+    .of-row:hover .of-track{animation-play-state:paused!important}
+
+    @media(max-width:768px){
+      .of-char{width:88px;height:112px}
+      .of-char-oracle{width:34px;height:34px}
+      .of-fade{width:60px}
+      .oracle-flow-sec{padding:80px 0 70px}
+    }
+
+    /* ===== 分类 ===== */
+    .cat-grid{max-width:1400px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .cat-card{position:relative;padding:55px 20px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;text-align:center;cursor:pointer;overflow:hidden;transition:all .6s cubic-bezier(.16,1,.3,1)}
+    .cat-card:hover{transform:translateY(-10px) scale(1.02);border-color:var(--gold);box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 40px rgba(212,175,55,.06)}
+    .cat-bg{font-family:var(--font-serif);font-size:4.5rem;color:rgba(212,175,55,.03);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .8s cubic-bezier(.16,1,.3,1)}
+    .cat-card:hover .cat-bg{color:rgba(212,175,55,.15);transform:translate(-50%,-50%) scale(1.35) rotate(10deg);text-shadow:0 0 60px rgba(212,175,55,.12)}
+    .cat-card-inner{position:relative;z-index:1}
+    .cat-name{font-family:var(--font-serif);font-size:1rem;font-weight:600;margin-bottom:6px}
+    .cat-more{font-size:.72rem;color:var(--text-muted);transition:color .3s}
+    .cat-card:hover .cat-more{color:var(--gold)}
+
+    /* ===== 精选产品 ===== */
+    .feat-grid{max-width:1400px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+    .fc2{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .6s cubic-bezier(.16,1,.3,1);position:relative}
+    .fc2:hover{transform:translateY(-10px) scale(1.02);border-color:var(--gold);box-shadow:0 25px 70px rgba(0,0,0,.35),0 0 40px rgba(212,175,55,.06)}
+    .fc2 .cg{position:absolute;inset:0;opacity:0;transition:opacity .5s;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(212,175,55,.07) 0%,transparent 55%);pointer-events:none;z-index:1}
+    .fc2:hover .cg{opacity:1}
+    .fc2-img{width:100%;height:320px;position:relative;overflow:hidden;background:linear-gradient(135deg,#080806,#121110);display:flex;align-items:center;justify-content:center}
+    .fc2-img img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.16,1,.3,1),filter .6s;filter:brightness(.9)}
+    .fc2:hover .fc2-img img{transform:scale(1.1);filter:brightness(1.05)}
+    .fc2-ph{font-family:var(--font-serif);font-size:5.5rem;color:rgba(212,175,55,.05);transition:all 1s cubic-bezier(.16,1,.3,1);position:relative;z-index:2}
+    .fc2:hover .fc2-ph{color:rgba(212,175,55,.2);transform:scale(1.25) rotate(8deg);text-shadow:0 0 80px rgba(212,175,55,.15)}
+    .fc2-hover-o{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:12rem;color:rgba(212,175,55,0);pointer-events:none;z-index:0;transition:all 1.5s cubic-bezier(.16,1,.3,1);filter:blur(12px)}
+    .fc2:hover .fc2-hover-o{color:rgba(212,175,55,.06);filter:blur(0px);transform:scale(1.08) rotate(-5deg)}
+    .fc2-badge{position:absolute;top:12px;left:12px;padding:4px 12px;background:rgba(231,76,60,.9);color:#fff;font-size:.72rem;font-weight:600;border-radius:4px;z-index:3}
+    .fc2-hover{position:absolute;inset:0;z-index:4;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.35) 40%,transparent 70%);display:flex;flex-direction:column;justify-content:flex-end;padding:20px;opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1)}
+    .fc2:hover .fc2-hover{opacity:1}
+    .fc2-btns{display:flex;gap:10px;transform:translateY(20px);opacity:0;transition:all .5s .1s cubic-bezier(.16,1,.3,1)}
+    .fc2:hover .fc2-btns{transform:translateY(0);opacity:1}
+    .fc2-btns button{flex:1;padding:11px;border-radius:6px;font-size:.8rem;cursor:pointer;transition:all .3s;border:1px solid rgba(212,175,55,.3);background:rgba(212,175,55,.08);color:var(--gold)}
+    .fc2-btns button:hover{background:var(--gold);color:#000}
+    .fc2-btns .fmain{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+    .fc2-btns .fmain:hover{background:#e8c84a;box-shadow:0 5px 20px rgba(212,175,55,.3)}
+    .fc2-body{padding:22px;position:relative;z-index:2}
+    .fc2-cat{font-size:.7rem;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+    .fc2-name{font-family:var(--font-serif);font-size:1.05rem;font-weight:600;margin-bottom:14px;line-height:1.5}
+    .fc2-foot{display:flex;justify-content:space-between;align-items:center}
+    .fc2-price{font-family:var(--font-serif);font-size:1.25rem;font-weight:700;color:var(--gold)}
+    .fc2-price .old{font-size:.8rem;color:var(--text-muted);text-decoration:line-through;margin-left:6px;font-weight:400}
+    .fc2-rate{font-size:.78rem;color:var(--text-secondary)}
+    .fc2-rate .stars{color:var(--gold)}
+
+    /* ===== 品牌理念 ===== */
+    .sec-brand{padding:120px 0;background:#050505;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color)}
+    .brand-grid{max-width:1200px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+    .brand-item{text-align:center;padding:44px 24px;border:1px solid var(--border-color);border-radius:14px;background:rgba(10,10,10,.5);transition:all .6s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+    .brand-item::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .5s;background:radial-gradient(circle at 50% 50%,rgba(212,175,55,.04) 0%,transparent 70%)}
+    .brand-item:hover{border-color:rgba(212,175,55,.25);transform:translateY(-8px) scale(1.02);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+    .brand-item:hover::before{opacity:1}
+    .brand-icon{font-family:var(--font-serif);font-size:3rem;color:var(--gold);margin-bottom:20px;display:inline-block;transition:all .6s;position:relative;z-index:1}
+    .brand-item:hover .brand-icon{transform:scale(1.2) rotate(-8deg);text-shadow:0 0 40px rgba(212,175,55,.3)}
+    .brand-title{font-family:var(--font-serif);font-size:1.1rem;font-weight:600;margin-bottom:12px;position:relative;z-index:1}
+    .brand-desc{font-size:.85rem;color:var(--text-muted);line-height:1.8;position:relative;z-index:1}
+        /* =============================================
+       品牌理念 · 终极升级版
+       ============================================= */
+    .philo-sec{padding:160px 0 120px;position:relative;overflow:hidden;background:#010101}
+
+    /* --- 背景系统 --- */
+    .ph-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .ph-grid{position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(212,175,55,.005) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(212,175,55,.005) 1px,transparent 1px);
+      background-size:100px 100px;
+      mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,black 10%,transparent 70%)}
+    .ph-radials{position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 800px 500px at 50% 30%,rgba(212,175,55,.02) 0%,transparent 70%),
+        radial-gradient(ellipse 400px 300px at 15% 60%,rgba(212,175,55,.01) 0%,transparent 70%),
+        radial-gradient(ellipse 400px 300px at 85% 60%,rgba(212,175,55,.01) 0%,transparent 70%)}
+    .ph-horizon{position:absolute;bottom:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(212,175,55,.06),transparent)}
+    .ph-float-chars .ph-fc{position:absolute;font-family:var(--font-serif);color:rgba(212,175,55,.004);
+      transition:all 2s cubic-bezier(.16,1,.3,1);will-change:color,text-shadow}
+    .ph-float-chars .ph-fc.glow{color:rgba(212,175,55,.035)!important;text-shadow:0 0 100px rgba(212,175,55,.05)}
+    .ph-particles .ph-pt{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;
+      opacity:0;animation:phPt var(--d) ease-in-out infinite;animation-delay:var(--dl)}
+    @keyframes phPt{0%{opacity:0;transform:translateY(0) scale(0)}40%{opacity:.2}60%{opacity:.1}100%{opacity:0;transform:translateY(-80px) scale(0)}}
+
+    /* --- 头部 --- */
+    .ph-header{text-align:center;margin-bottom:80px;position:relative;z-index:5}
+    .ph-label{font-size:.65rem;letter-spacing:10px;color:rgba(212,175,55,.4);margin-bottom:16px;font-weight:500}
+    .ph-title{font-family:var(--font-serif);font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:6px;margin-bottom:16px}
+    .ph-gold{background:linear-gradient(135deg,var(--gold),#f0d060,var(--gold));background-size:200% 100%;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:phGoldShine 4s ease-in-out infinite}
+    @keyframes phGoldShine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .ph-title-line{display:flex;justify-content:center;margin-bottom:24px}
+    .ph-title-line span{display:block;width:50px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+      position:relative}
+    .ph-title-line span::before,.ph-title-line span::after{content:'';position:absolute;top:50%;width:5px;height:5px;
+      border:1px solid rgba(212,175,55,.3);border-radius:50%;transform:translateY(-50%)}
+    .ph-title-line span::before{left:-12px}
+    .ph-title-line span::after{right:-12px}
+    .ph-subtitle{font-size:.9rem;color:var(--text-muted);line-height:2.2;max-width:550px;margin:0 auto}
+
+    /* --- 三卡片布局 --- */
+    .ph-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto;
+      padding:0 40px;position:relative;z-index:5;align-items:start}
+
+    /* --- 单卡片 --- */
+    .ph-card{position:relative;border-radius:20px;overflow:hidden;transition:all .7s cubic-bezier(.16,1,.3,1);cursor:default}
+    .ph-card-bg{position:absolute;inset:0;background:rgba(8,8,8,.85);backdrop-filter:blur(12px);z-index:0;
+      transition:background .5s}
+    .ph-card:hover .ph-card-bg{background:rgba(12,12,10,.9)}
+    .ph-card-border{position:absolute;inset:0;border-radius:20px;border:1px solid rgba(212,175,55,.05);
+      transition:border-color .5s;z-index:1;pointer-events:none}
+    .ph-card:hover .ph-card-border{border-color:rgba(212,175,55,.18)}
+    .ph-card-glow{position:absolute;inset:0;opacity:0;transition:opacity .6s;z-index:1;pointer-events:none;
+      background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(212,175,55,.06) 0%,transparent 55%)}
+    .ph-card:hover .ph-card-glow{opacity:1}
+    .ph-card:hover{transform:translateY(-12px);
+      box-shadow:0 24px 70px rgba(0,0,0,.5),0 0 50px rgba(212,175,55,.03)}
+    .ph-card-content{position:relative;z-index:2;padding:40px 32px 36px}
+
+    /* 中间卡片特殊 */
+    .ph-card-center{transform:translateY(-16px)}
+    .ph-card-center .ph-card-border{border-color:rgba(212,175,55,.12)}
+    .ph-card-center::before{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;z-index:3;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
+    .ph-card-center:hover{transform:translateY(-28px)}
+    .ph-card-crown{position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-50%);z-index:4;
+      padding:6px 20px;background:#0a0a0a;border:1px solid rgba(212,175,55,.25);border-radius:50px;
+      font-size:.6rem;letter-spacing:3px;color:var(--gold);white-space:nowrap}
+
+    /* 卡片顶部 */
+    .ph-card-top{display:flex;align-items:center;gap:12px;margin-bottom:30px}
+    .ph-card-num{font-family:var(--font-serif);font-size:.7rem;color:rgba(212,175,55,.25);letter-spacing:2px;
+      font-weight:700;transition:color .5s}
+    .ph-card:hover .ph-card-num{color:rgba(212,175,55,.5)}
+    .ph-card-line-h{flex:1;height:1px;background:linear-gradient(90deg,rgba(212,175,55,.08),transparent)}
+
+    /* 核心汉字 */
+    .ph-oracle-wrap{position:relative;width:120px;height:120px;margin:0 auto 28px;display:flex;
+      align-items:center;justify-content:center}
+    .ph-oracle-ring{position:absolute;inset:0;border:1px solid rgba(212,175,55,.06);border-radius:50%;
+      transition:all .8s cubic-bezier(.16,1,.3,1)}
+    .ph-ring-2{inset:-12px;border-color:rgba(212,175,55,.03);animation:phRingSpin 20s linear infinite}
+    @keyframes phRingSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .ph-card:hover .ph-oracle-ring{border-color:rgba(212,175,55,.2);transform:scale(1.08)}
+    .ph-card:hover .ph-ring-2{border-color:rgba(212,175,55,.1);transform:scale(1.12) rotate(180deg)}
+    .ph-oracle-char{font-family:var(--font-serif);font-size:3.8rem;font-weight:800;
+      background:linear-gradient(180deg,rgba(212,175,55,.15),rgba(212,175,55,.06));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      transition:all .8s cubic-bezier(.16,1,.3,1);position:relative;z-index:1}
+    .ph-card:hover .ph-oracle-char{
+      background:linear-gradient(180deg,var(--gold),rgba(212,175,55,.6));
+      -webkit-background-clip:text;background-clip:text;
+      filter:drop-shadow(0 0 30px rgba(212,175,55,.3));transform:scale(1.1)}
+
+    /* 标题 */
+    .ph-card-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:700;text-align:center;
+      margin-bottom:6px;transition:color .5s;letter-spacing:3px}
+    .ph-card:hover .ph-card-title{color:var(--gold)}
+    .ph-card-en{font-size:.62rem;letter-spacing:3px;color:rgba(212,175,55,.2);text-align:center;
+      margin-bottom:20px;text-transform:uppercase;transition:color .5s}
+    .ph-card:hover .ph-card-en{color:rgba(212,175,55,.4)}
+
+    /* 描述 */
+    .ph-card-desc{font-size:.86rem;color:var(--text-muted);line-height:2;text-align:center;
+      margin-bottom:20px;padding:0 8px}
+
+    /* 细节列表 */
+    .ph-card-list{list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px}
+    .ph-card-list li{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--text-secondary);
+      padding:6px 12px;border-radius:6px;transition:all .35s;cursor:default}
+    .ph-card-list li:hover{background:rgba(212,175,55,.03);transform:translateX(4px)}
+    .ph-li-dot{width:5px;height:5px;border-radius:50%;background:rgba(212,175,55,.2);flex-shrink:0;
+      transition:all .4s}
+    .ph-card-list li:hover .ph-li-dot{background:var(--gold);box-shadow:0 0 8px rgba(212,175,55,.4)}
+
+    /* 标签 */
+    .ph-card-tags{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+    .ph-tag{padding:4px 12px;border:1px solid rgba(212,175,55,.06);border-radius:4px;
+      font-size:.65rem;color:var(--text-muted);letter-spacing:1px;transition:all .35s;cursor:default}
+    .ph-tag:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,175,55,.04);transform:translateY(-1px)}
+
+    /* 底线 */
+    .ph-card-bottom-line{height:2px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.04),transparent);
+      border-radius:1px;transition:all .6s}
+    .ph-card:hover .ph-card-bottom-line{background:linear-gradient(90deg,transparent,rgba(212,175,55,.2),transparent)}
+
+    /* --- 品牌宣言 --- */
+    .ph-manifesto{max-width:860px;margin:80px auto 0;padding:0 40px;position:relative;z-index:5}
+    .ph-mani-inner{background:rgba(10,10,10,.6);border:1px solid rgba(212,175,55,.06);border-radius:18px;
+      padding:48px;text-align:center;position:relative;backdrop-filter:blur(8px);
+      transition:all .6s cubic-bezier(.16,1,.3,1);overflow:hidden}
+    .ph-mani-inner::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(212,175,55,.15),transparent)}
+    .ph-mani-inner:hover{border-color:rgba(212,175,55,.15);transform:translateY(-4px);
+      box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .ph-mani-quote{font-family:serif;font-size:5rem;color:rgba(212,175,55,.06);line-height:1;
+      position:absolute;top:20px;left:32px;pointer-events:none}
+    .ph-mani-text{font-family:var(--font-serif);font-size:1rem;color:var(--text-secondary);line-height:2.4;
+      position:relative;z-index:1}
+    .ph-mani-text strong{color:var(--gold);font-weight:600}
+    .ph-mani-brand{font-size:.78rem;color:var(--text-muted);letter-spacing:4px;margin-top:20px;
+      position:relative;z-index:1}
+
+    /* --- 底部数据 --- */
+    .ph-metrics{display:flex;justify-content:center;align-items:center;gap:0;max-width:800px;
+      margin:60px auto 0;padding:0 40px;position:relative;z-index:5}
+    .ph-metric{flex:1;text-align:center;padding:20px 16px;cursor:default;transition:all .4s cubic-bezier(.16,1,.3,1)}
+    .ph-metric:hover{transform:translateY(-4px)}
+    .ph-metric-num{font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:4px;
+      transition:text-shadow .5s}
+    .ph-metric:hover .ph-metric-num{text-shadow:0 0 25px rgba(212,175,55,.3)}
+    .ph-metric-unit{font-size:.9rem;font-weight:400;opacity:.6}
+    .ph-metric-label{font-size:.68rem;color:var(--text-muted);letter-spacing:2px}
+    .ph-metric-div{width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(212,175,55,.12),transparent);flex-shrink:0}
+
+    /* --- 响应式 --- */
+    @media(max-width:1024px){
+      .ph-cards{grid-template-columns:1fr;max-width:500px;gap:20px}
+      .ph-card-center{transform:none}
+      .ph-card-center:hover{transform:translateY(-12px)}
+      .ph-card-crown{position:relative;top:auto;left:auto;transform:none;display:inline-block;margin-bottom:12px;text-align:center;width:100%}
+    }
+    @media(max-width:768px){
+      .philo-sec{padding:100px 0 80px}
+      .ph-cards{padding:0 20px}
+      .ph-card-content{padding:30px 24px 28px}
+      .ph-manifesto{padding:0 20px}
+      .ph-mani-inner{padding:32px 24px}
+      .ph-metrics{flex-direction:column;gap:8px}
+      .ph-metric-div{width:50px;height:1px}
+    }
+    /* ===== CTA ===== */
+    .sec-cta{padding:140px 0;text-align:center;position:relative;overflow:hidden}
+    .sec-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 900px 500px at 50% 50%,rgba(212,175,55,.05) 0%,transparent 70%)}
+    .cta-oracle{font-family:var(--font-serif);font-size:14rem;color:rgba(212,175,55,.025);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+    .cta-c{position:relative;z-index:1}
+    .cta-c h2{font-family:var(--font-serif);font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:16px}
+    .cta-c p{color:var(--text-muted);font-size:.95rem;max-width:500px;margin:0 auto 36px;line-height:1.8}
+
+    /* ===== 页脚 ===== */
+    .footer{background:#050505;border-top:1px solid var(--border-color)}
+    .footer-inner{max-width:1400px;margin:0 auto;padding:60px 40px 30px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+    .footer-brand h3{font-family:var(--font-serif);font-size:1.2rem;margin-bottom:12px}
+    .footer-brand p{color:var(--text-muted);font-size:.85rem;line-height:1.7}
+    .footer-col h4{font-family:var(--font-serif);font-size:.88rem;margin-bottom:16px;color:var(--text-primary)}
+    .footer-col ul{list-style:none}
+    .footer-col li{margin-bottom:10px}
+    .footer-col a{font-size:.82rem;color:var(--text-muted);transition:color .3s}
+    .footer-col a:hover{color:var(--gold)}
+    .footer-bottom{display:flex;justify-content:space-between;padding-top:24px;border-top:1px solid var(--border-color);font-size:.75rem;color:var(--text-muted)}
+
+    @media(max-width:768px){.brand-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.feat-grid{grid-template-columns:1fr 1fr}.oracle-row{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:480px){.feat-grid,.oracle-row{grid-template-columns:1fr 1fr}}
+      /* =============================================
+       全局生命力系统 · Living Canvas
+       ============================================= */
+    .living-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .lc-blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:0;
+      animation:lcBlobLife var(--bd) ease-in-out infinite;will-change:transform,opacity}
+    .lc-blob-1{width:600px;height:600px;background:rgba(212,175,55,.025);top:-10%;left:-10%;--bd:18s}
+    .lc-blob-2{width:500px;height:500px;background:rgba(212,175,55,.018);bottom:-10%;right:-10%;--bd:22s;animation-delay:-6s}
+    .lc-blob-3{width:400px;height:400px;background:rgba(180,140,50,.02);top:40%;left:50%;--bd:16s;animation-delay:-10s}
+    .lc-blob-4{width:350px;height:350px;background:rgba(212,175,55,.015);top:20%;right:20%;--bd:20s;animation-delay:-4s}
+    @keyframes lcBlobLife{
+      0%{transform:translate(0,0) scale(1);opacity:0}
+      15%{opacity:.6}
+      30%{transform:translate(80px,-60px) scale(1.3);opacity:.8}
+      50%{transform:translate(-40px,80px) scale(.9);opacity:.5}
+      70%{transform:translate(60px,40px) scale(1.2);opacity:.7}
+      85%{opacity:.4}
+      100%{transform:translate(0,0) scale(1);opacity:0}
+    }
+    .lc-flow{position:absolute;inset:0;opacity:.012;
+      background:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(212,175,55,.3) 2px,rgba(212,175,55,.3) 3px);
+      background-size:40px 40px;animation:lcFlowMove 20s linear infinite}
+    @keyframes lcFlowMove{0%{background-position:0 0}100%{background-position:40px 40px}}
+
+    .lc-cursor{position:fixed;pointer-events:none;z-index:9998;width:400px;height:400px;border-radius:50%;
+      background:radial-gradient(circle,rgba(212,175,55,.04) 0%,rgba(212,175,55,.01) 30%,transparent 65%);
+      transform:translate(-50%,-50%);will-change:transform;
+      transition:width .4s,height .4s,opacity .3s,background .4s;
+      opacity:0;mix-blend-mode:screen}
+    .lc-cursor.active{opacity:1}
+    .lc-cursor.expand{width:650px;height:650px;
+      background:radial-gradient(circle,rgba(212,175,55,.07) 0%,rgba(212,175,55,.02) 35%,transparent 60%)}
+
+    .lc-ripple{position:fixed;pointer-events:none;z-index:9997;border-radius:50%;
+      border:1px solid rgba(212,175,55,.12);animation:lcRipple 1.2s ease-out forwards}
+    @keyframes lcRipple{0%{width:0;height:0;opacity:.5;transform:translate(-50%,-50%)}100%{width:200px;height:200px;opacity:0;transform:translate(-50%,-50%)}}
+
+    .lc-dot{position:fixed;pointer-events:none;z-index:9999;width:5px;height:5px;border-radius:50%;
+      background:var(--gold);opacity:0;will-change:transform;
+      transition:opacity .3s;
+      box-shadow:0 0 6px rgba(212,175,55,.5),0 0 16px rgba(212,175,55,.2)}
+    .lc-dot.active{opacity:.7}
+
+    .lc-water{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.35}
+    .lc-water svg{width:100%;height:100%}
+    .lc-water-grad{animation:lcWaterShift 10s ease-in-out infinite}
+    @keyframes lcWaterShift{0%{stop-color:rgba(212,175,55,.008)}50%{stop-color:rgba(212,175,55,.02)}100%{stop-color:rgba(212,175,55,.008)}}
+
+    .lc-fireflies{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+    .lc-fly{position:absolute;border-radius:50%;background:var(--gold);
+      animation:lcFlyFloat var(--fd) ease-in-out infinite;animation-delay:var(--fdelay);opacity:0;will-change:transform,opacity}
+    @keyframes lcFlyFloat{
+      0%{opacity:0;transform:translate(0,0) scale(0)}
+      10%{opacity:var(--fo,.3)}
+      30%{transform:translate(var(--fx1),var(--fy1)) scale(1)}
+      60%{opacity:var(--fo,.3);transform:translate(var(--fx2),var(--fy2)) scale(.7)}
+      90%{opacity:.05}
+      100%{opacity:0;transform:translate(var(--fx3),var(--fy3)) scale(0)}
+    }
+
+    .flow-divider{position:relative;height:80px;overflow:hidden;z-index:5}
+    .flow-divider canvas{width:100%;height:100%;display:block}
+
+    section,.navbar,footer{position:relative;z-index:3}
+    .navbar{z-index:100}
+    /* =============================================
+       Hero · 极致电镀3D & 原生排版
+       ============================================= */
+    /* =============================================
+       Hero · 顶奢黑金 3D & 星河排版 (修复错位+材质升级)
+       ============================================= */
+        /* =============================================
+       Hero · 真实3D渲染 & 远古星图排版
+       ============================================= */
+        /* =============================================
+       Hero · 顶奢黄金铸造 3D & 遗迹法阵
+       ============================================= */
+    .hero-3d { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(30px, 5vw, 100px); overflow: hidden; background: #030201; }
+    .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .h3-vignette { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse 65% 65% at 50% 50%, transparent 10%, rgba(0,0,0,0.95) 100%); mix-blend-mode: multiply; }
+
+    /* --- 左侧排版 --- */
+    .h3-left { position: relative; z-index: 10; max-width: 480px; }
+    .h3-tag { display: inline-flex; align-items: center; gap: 10px; font-size: 0.65rem; letter-spacing: 5px; color: rgba(212,175,55,0.8); margin-bottom: 24px; font-weight: 600; }
+    .h3-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #d4af37; box-shadow: 0 0 12px 2px rgba(212,175,55,0.9); animation: pulse 1.5s infinite alternate; }
+    @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.3); } }
+    .h3-title { font-family: var(--font-serif); font-size: clamp(2.8rem, 4vw, 3.8rem); font-weight: 900; line-height: 1.4; margin-bottom: 26px; letter-spacing: 4px; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+    .h3-t-line { display: block; }
+    .h3-title em { font-style: normal; background: linear-gradient(135deg, #fffce8, #e0b441, #9c6c0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .h3-desc { font-family: var(--font-serif); font-size: 1rem; color: rgba(255,255,255,0.7); line-height: 2.2; margin-bottom: 40px; padding-left: 20px; border-left: 2px solid rgba(212,175,55,0.5); text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+    .h3-btns { display: flex; gap: 16px; }
+    .h3-btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 4px; font-size: 0.85rem; font-weight: 700; letter-spacing: 2px; text-decoration: none; transition: 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .h3-btn-primary { background: linear-gradient(135deg, #fceb9a, #c49927); color: #1a1202; box-shadow: 0 5px 25px rgba(212,175,55,0.3); }
+    .h3-btn-primary:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 40px rgba(212,175,55,0.6); filter: brightness(1.15); }
+    .h3-btn-ghost { border: 1px solid rgba(212,175,55,0.5); color: #d4af37; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+    .h3-btn-ghost:hover { background: rgba(212,175,55,0.2); transform: translateY(-4px); color: #fff; border-color: #ffd666; }
+
+    /* --- 右侧卡片 --- */
+    .h3-right { position: relative; z-index: 10; display: flex; flex-direction: column; gap: 20px; max-width: 340px; }
+    .h3-rcard { display: flex; align-items: center; gap: 20px; padding: 24px; background: rgba(15,12,6,0.8); border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; backdrop-filter: blur(12px); cursor: pointer; transition: 0.5s cubic-bezier(0.16,1,0.3,1); box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; }
+    .h3-rcard:hover { transform: translateX(-15px) scale(1.02); border-color: rgba(212,175,55,0.6); background: rgba(25,18,8,0.9); box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(212,175,55,0.1); }
+    .h3-rc-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); transition: 0.4s; }
+    .h3-rc-char { font-family: var(--font-serif); font-size: 2.2rem; font-weight: 900; color: #d4af37; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
+    .h3-rcard:hover .h3-rc-icon { background: linear-gradient(135deg, #fceb9a, #c49927); transform: scale(1.15) rotate(5deg); box-shadow: 0 5px 20px rgba(212,175,55,0.6); border-color: transparent; }
+    .h3-rcard:hover .h3-rc-char { color: #1a1202; text-shadow: none; }
+    .h3-rc-body { flex: 1; }
+    .h3-rc-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); letter-spacing: 3px; margin-bottom: 6px; }
+    .h3-rc-title { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 700; color: #fff; letter-spacing: 4px; transition: 0.3s; }
+    .h3-rcard:hover .h3-rc-title { color: #fceb9a; text-shadow: 0 0 10px rgba(212,175,55,0.4); }
+    .h3-rc-arrow { color: rgba(212,175,55,0.4); font-size: 1.2rem; transition: 0.3s; }
+    .h3-rcard:hover .h3-rc-arrow { color: #fceb9a; transform: translateX(8px); }
+
+     /* =========================================
+       3D 黄金字 · 终极材质升华版
+       ========================================= */
+        /* =========================================
+       3D 黄金字 · 全角度立体终极版
+       ========================================= */
+    .h3-center { position: relative; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .h3-char-stage { position: relative; width: clamp(300px, 35vw, 500px); height: clamp(300px, 35vw, 500px); perspective: 1200px; display: flex; align-items: center; justify-content: center; }
+    
+    .h3-gold-wrap { 
+      position: relative; width: 100%; height: 100%; 
+      transform-style: preserve-3d;
+      transform: rotateY(var(--ry, 12deg)) rotateX(var(--rx, 6deg));
+      transition: transform 0.15s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.5s;
+      animation: trueFloat 6.5s ease-in-out infinite;
+    }
+    @keyframes trueFloat { 0%, 100% { top: 0px; } 50% { top: -20px; } }
+
+    .h3-gold-face, .h3-gold-depth-y, .h3-gold-depth-x, .h3-gold-depth-xy, .h3-gold-shadow {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-serif);
+      font-size: clamp(16rem, 24vw, 26rem);
+      font-weight: 900; 
+      height: 1.5em;
+      line-height: normal;
+      display: flex; align-items: center; justify-content: center;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    /* ── 1. Y轴厚度层（上下视角的立体感） ── */
+    .h3-gold-depth-y {
+      color: transparent; pointer-events: none; z-index: 1;
+      text-shadow: 
+        0 1px 0 #c9a035, 0 2px 0 #c49b32, 0 3px 0 #bf962f, 0 4px 0 #ba912c, 0 5px 0 #b58c29,
+        0 6px 0 #b08726, 0 7px 0 #ab8223, 0 8px 0 #a67d20, 0 9px 0 #a1781d, 0 10px 0 #9c731a,
+        0 11px 0 #976e17, 0 12px 0 #926914, 0 13px 0 #8d6411, 0 14px 0 #885f0e, 0 15px 0 #835a0b,
+        0 16px 0 #7e5508, 0 17px 0 #795005, 0 18px 0 #744b02, 0 19px 0 #6f4600, 0 20px 0 #6a4100,
+        0 21px 0 #653c00, 0 22px 0 #603700, 0 23px 0 #5b3200, 0 24px 0 #562d00, 0 25px 0 #512800;
+    }
+
+    /* ── 2. X轴厚度层（左右视角的立体感） ── */
+    .h3-gold-depth-x {
+      color: transparent; pointer-events: none; z-index: 1;
+      text-shadow: 
+        1px 0 0 #c9a035, 2px 0 0 #c49b32, 3px 0 0 #bf962f, 4px 0 0 #ba912c, 5px 0 0 #b58c29,
+        6px 0 0 #b08726, 7px 0 0 #ab8223, 8px 0 0 #a67d20, 9px 0 0 #a1781d, 10px 0 0 #9c731a,
+        11px 0 0 #976e17, 12px 0 0 #926914, 13px 0 0 #8d6411, 14px 0 0 #885f0e, 15px 0 0 #835a0b,
+        16px 0 0 #7e5508, 17px 0 0 #795005, 18px 0 0 #744b02, 19px 0 0 #6f4600, 20px 0 0 #6a4100,
+        21px 0 0 #653c00, 22px 0 0 #603700, 23px 0 0 #5b3200, 24px 0 0 #562d00, 25px 0 0 #512800;
+    }
+
+    /* ── 3. XY对角线厚度层（斜角视角的完整立体感） ── */
+    .h3-gold-depth-xy {
+      color: transparent; pointer-events: none; z-index: 1;
+      text-shadow: 
+        1px 1px 0 #c9a035, 2px 2px 0 #c49b32, 3px 3px 0 #bf962f, 4px 4px 0 #ba912c, 5px 5px 0 #b58c29,
+        6px 6px 0 #b08726, 7px 7px 0 #ab8223, 8px 8px 0 #a67d20, 9px 9px 0 #a1781d, 10px 10px 0 #9c731a,
+        11px 11px 0 #976e17, 12px 12px 0 #926914, 13px 13px 0 #8d6411, 14px 14px 0 #885f0e, 15px 15px 0 #835a0b,
+        16px 16px 0 #7e5508, 17px 17px 0 #795005, 18px 18px 0 #744b02, 19px 19px 0 #6f4600, 20px 20px 0 #6a4100,
+        21px 21px 0 #653c00, 22px 22px 0 #603700, 23px 23px 0 #5b3200, 24px 24px 0 #562d00, 25px 25px 0 #512800;
+    }
+
+    /* ── 4. 正面层：熔岩流金 + 内发光浮雕 ── */
+    .h3-gold-face {
+      z-index: 3;
+      background: linear-gradient(140deg, 
+        #fffff0 0%,
+        #fae89e 8%,
+        #d4af37 22%,
+        #a07818 38%,
+        #e8c84e 48%,
+        #c49520 58%,
+        #8c6210 72%,
+        #d4af37 88%,
+        #5a3a06 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent; 
+      filter: 
+        drop-shadow(-1px -1px 0px rgba(255, 240, 180, 0.5))
+        drop-shadow(1px 1px 0px rgba(60, 30, 0, 0.6))
+        drop-shadow(0 0 10px rgba(200, 160, 40, 0.25));
+    }
+
+    /* ── 5. 流光扫射层 ── */
+    .h3-gold-face::after {
+      content: attr(data-char);
+      position: absolute; inset: 0;
+      height: 1.5em; line-height: normal;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif);
+      font-size: clamp(16rem, 24vw, 26rem);
+      font-weight: 900; letter-spacing: -0.02em; white-space: nowrap;
+      background: linear-gradient(100deg, 
+        transparent 0%, transparent 35%,
+        rgba(255, 250, 220, 0.15) 42%,
+        rgba(255, 245, 200, 0.5) 46%, 
+        rgba(255, 255, 255, 0.9) 50%, 
+        rgba(255, 245, 200, 0.5) 54%, 
+        rgba(255, 250, 220, 0.15) 58%,
+        transparent 65%
+      );
+      background-size: 300% 100%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      mix-blend-mode: color-dodge; pointer-events: none; filter: none;
+      animation: sweepGold 5s ease-in-out infinite;
+    }
+    @keyframes sweepGold { 0% { background-position: 300% 0; } 50% { background-position: -100% 0; } 100% { background-position: 300% 0; } }
+
+    /* ── 6. 底座阴影：隐藏 ── */
+    .h3-gold-shadow { display: none !important; }
+
+    .h3-char-label { margin-top: 50px; display: flex; align-items: center; gap: 20px; font-size: 0.85rem; font-weight: 800; letter-spacing: 12px; color: #e6c55c; text-shadow: 0 0 15px rgba(212,175,55,0.7); transition: opacity 0.5s; }
+    .h3-cl-line { width: 70px; height: 1px; background: linear-gradient(90deg, transparent, #e6c55c, transparent); }
+    .h3-t-reveal { opacity: 0; transform: translateY(40px); transition: 1s cubic-bezier(0.16,1,0.3,1); }
+    .h3-t-reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <!-- ===== 全局生命力画布 ===== -->
+  <div class="living-canvas" id="livingCanvas">
+    <div class="lc-blob lc-blob-1"></div>
+    <div class="lc-blob lc-blob-2"></div>
+    <div class="lc-blob lc-blob-3"></div>
+    <div class="lc-blob lc-blob-4"></div>
+    <div class="lc-flow"></div>
+  </div>
+  <div class="lc-water" id="lcWater">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="lcWaveFilter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.008" numOctaves="3" seed="2">
+            <animate attributeName="baseFrequency" values="0.012 0.008;0.015 0.012;0.012 0.008" dur="12s" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale="18">
+            <animate attributeName="scale" values="18;28;18" dur="8s" repeatCount="indefinite"/>
+          </feDisplacementMap>
+        </filter>
+        <linearGradient id="lcWaveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" class="lc-water-grad" stop-color="rgba(212,175,55,.01)"/>
+          <stop offset="50%" stop-color="transparent"/>
+          <stop offset="100%" class="lc-water-grad" stop-color="rgba(212,175,55,.015)"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#lcWaveGrad)" filter="url(#lcWaveFilter)"/>
+    </svg>
+  </div>
+  <div class="lc-fireflies" id="lcFireflies"></div>
+  <div class="lc-cursor" id="lcCursor"></div>
+  <div class="lc-dot" id="lcDot"></div>
+
+  <div class="ld-screen" id="ld"><div class="ld-char">甲</div><div class="ld-text">HIEROGLYPH</div><div class="ld-bar"></div></div>
+  <div class="grain"></div>
+  <div class="g-glow" id="gGlow"></div>
+
+  <nav class="navbar" id="navbar">
+    <a href="/" class="nav-logo"><span class="logo-icon">甲</span><span>象形文创</span></a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">首页</a></li>
+      <li><a href="/products.html">全部产品</a></li>
+      <li><a href="/oracle.html">甲骨文字馆</a></li>
+      <li><a href="/history.html">千年之旅</a></li>
+      <li><a href="/favorites.html">收藏</a></li>
+      <li><a href="/cart.html">购物车</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+  </nav>
+
+
+    <!-- ===== Hero · 顶奢黄金铸造 3D & 遗迹法阵版 ===== -->
+  <section class="hero-3d" id="hero3d">
+    <!-- 极度华丽的全屏背景 -->
+    <canvas id="richCanvas" class="hero-canvas"></canvas>
+    <div class="h3-vignette"></div>
+
+    <!-- 左侧排版 -->
+    <div class="h3-left" id="h3Left">
+      <div class="h3-tag h3-t-reveal" data-delay="0">
+        <span class="h3-tag-dot"></span>
+        <span>HIEROGLYPH · CREATIVE</span>
+      </div>
+      <h1 class="h3-title">
+        <span class="h3-t-line h3-t-reveal" data-delay="100">当 <em>古老文字</em></span>
+        <span class="h3-t-line h3-t-reveal" data-delay="250">遇见 <em>现代创意</em></span>
+      </h1>
+      <p class="h3-desc h3-t-reveal" data-delay="400">
+        每一件文创产品，都是一次跨越千年的对话。<br>
+        我们将甲骨文的智慧融入现代设计，让古老文明焕发新生。
+      </p>
+      <div class="h3-btns h3-t-reveal" data-delay="550">
+        <a href="/products.html" class="h3-btn h3-btn-primary">
+          <span>探索产品</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#history" class="h3-btn h3-btn-ghost">
+          <span>了解更多</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 中间：完美无瑕的黄金 3D 字 -->
+    <div class="h3-center" id="h3Center">
+      <div class="h3-char-stage">
+        <!-- 坚如磐石的三层结构，绝不错位，绝无黑缝 -->
+        <div class="h3-gold-wrap" id="goldWrap">
+          <div class="h3-gold-depth-y" id="charDepthY">甲</div>
+          <div class="h3-gold-depth-x" id="charDepthX">甲</div>
+          <div class="h3-gold-depth-xy" id="charDepthXY">甲</div>
+          <div class="h3-gold-face" id="charFace" data-char="甲">甲</div>
+        </div>
+      </div>
+      <div class="h3-char-label">
+        <span class="h3-cl-line"></span>
+        <span class="h3-cl-text" id="h3ClText">ORACLE BONE SCRIPT</span>
+        <span class="h3-cl-line"></span>
+      </div>
+    </div>
+
+    <!-- 右侧卡片 -->
+    <div class="h3-right" id="h3Right">
+      <div class="h3-rcard h3-t-reveal" data-delay="300" data-idx="01">
+        <div class="h3-rc-glow"></div>
+        <div class="h3-rc-icon"><span class="h3-rc-char">文</span></div>
+        <div class="h3-rc-body">
+          <div class="h3-rc-label">探索三千年</div>
+          <div class="h3-rc-title">文字文明</div>
+          <div class="h3-rc-bar"><div class="h3-rc-bar-fill" style="--bw:85%"></div></div>
+        </div>
+        <div class="h3-rc-arrow">→</div>
+      </div>
+
+      <div class="h3-rcard h3-t-reveal" data-delay="450" data-idx="02">
+        <div class="h3-rc-glow"></div>
+        <div class="h3-rc-icon"><span class="h3-rc-char">匠</span></div>
+        <div class="h3-rc-body">
+          <div class="h3-rc-label">100% 原创</div>
+          <div class="h3-rc-title">匠心设计</div>
+          <div class="h3-rc-bar"><div class="h3-rc-bar-fill" style="--bw:92%"></div></div>
+        </div>
+        <div class="h3-rc-arrow">→</div>
+      </div>
+
+      <div class="h3-rcard h3-t-reveal" data-delay="600" data-idx="03">
+        <div class="h3-rc-glow"></div>
+        <div class="h3-rc-icon"><span class="h3-rc-char">美</span></div>
+        <div class="h3-rc-body">
+          <div class="h3-rc-label">东方美学</div>
+          <div class="h3-rc-title">现代表达</div>
+          <div class="h3-rc-bar"><div class="h3-rc-bar-fill" style="--bw:78%"></div></div>
+        </div>
+        <div class="h3-rc-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="h3-scroll-hint"><div class="h3-sh-line"></div><span>SCROLL</span></div>
+    <div class="h3-bottom-line"></div>
+  </section>
+    <div class="flow-divider"><canvas class="flow-canvas"></canvas></div>
+    <!-- ===== 甲骨文千年之旅 · 终极版 ===== -->
+  <section class="history-sec" id="history">
+    <div class="hs-bg">
+      <div class="hs-grid-overlay"></div>
+      <div class="hs-oracles" id="hsOracles"></div>
+      <div class="hs-radial"></div>
+      <div class="hs-lines" id="hsLines"></div>
+      <div class="hs-particles" id="hsParticles"></div>
+    </div>
+
+    <div class="hs-header-zone">
+      <div class="sec-hd">
+        <div class="sec-label animate-on-scroll">THE THOUSAND-YEAR JOURNEY</div>
+        <h2 class="sec-title animate-on-scroll">甲骨文的 <span class="gold-text">千年之旅</span></h2>
+        <div class="sec-div"></div>
+        <p class="sec-desc animate-on-scroll delay-1">从殷商到现代，汉字走过三千年的演变之路</p>
+      </div>
+      <p class="hs-sub-intro animate-on-scroll delay-2">
+        甲骨文是<strong>中国迄今发现最早的成熟文字</strong>，也是<strong>世界四大古文字中唯一传承至今没有中断的文字体系</strong>。<br>
+        它上承新石器时代陶器刻画符号，下启金文、小篆、隶书、楷书，是汉字的直系先祖。
+      </p>
+      <div class="hs-stats animate-on-scroll">
+        <div class="hs-stat"><div class="hs-stat-icon">📜</div><div class="hs-stat-num" data-count="3600">0</div><div class="hs-stat-label">年文字历史</div><div class="hs-stat-bar"><div class="hs-stat-bar-fill"></div></div></div>
+        <div class="hs-stat-divider"></div>
+        <div class="hs-stat"><div class="hs-stat-icon">🐢</div><div class="hs-stat-num" data-count="150000">0</div><div class="hs-stat-label">片甲骨出土</div><div class="hs-stat-bar"><div class="hs-stat-bar-fill"></div></div></div>
+        <div class="hs-stat-divider"></div>
+        <div class="hs-stat"><div class="hs-stat-icon">✍️</div><div class="hs-stat-num" data-count="4500">0</div><div class="hs-stat-label">个不同单字</div><div class="hs-stat-bar"><div class="hs-stat-bar-fill"></div></div></div>
+        <div class="hs-stat-divider"></div>
+        <div class="hs-stat"><div class="hs-stat-icon">🏛️</div><div class="hs-stat-num" data-count="1500">0</div><div class="hs-stat-label">个已破译</div><div class="hs-stat-bar"><div class="hs-stat-bar-fill"></div></div></div>
+      </div>
+    </div>
+
+    <div class="hs-divider"><div class="hs-divider-line"></div><div class="hs-divider-dot"></div><div class="hs-divider-line"></div></div>
+
+    <div class="hs-timeline" id="hsTimeline">
+      <div class="hs-axis"><div class="hs-axis-fill" id="hsAxisFill"></div><div class="hs-axis-glow" id="hsAxisGlow"></div></div>
+
+      <!-- 节点1 -->
+      <div class="hs-node hs-left animate-on-scroll" data-year="前1600">
+        <div class="hs-node-content">
+          <div class="hs-card" data-oracle="甲">
+            <div class="hs-card-glow"></div>
+            <div class="hs-card-inner">
+              <div class="hs-card-header"><div class="hs-era-badge">商代</div><div class="hs-year-large">约公元前1600年</div></div>
+              <h3 class="hs-card-title">殷商甲骨文诞生</h3>
+              <p class="hs-card-desc">商代人将占卜记录刻写在<strong>龟甲</strong>和<strong>兽骨</strong>上，创造了中国最早的成系统文字——甲骨文。这些刻辞记录了商代的政治、军事、天文、农业等方方面面，是商代的<strong>"国家档案"</strong>。</p>
+              <div style="margin-bottom:14px"><span class="hs-key-data"><span class="kd-icon">🐢</span> 龟甲兽骨</span><span class="hs-key-data"><span class="kd-icon">🔮</span> 占卜记事</span><span class="hs-key-data"><span class="kd-icon">📝</span> 成熟文字</span></div>
+              <div class="hs-card-tags"><span class="hs-tag">卜辞</span><span class="hs-tag">殷墟文字</span><span class="hs-tag">契文</span><span class="hs-tag">龟甲文</span></div>
+              <div class="hs-card-footer"><span class="hs-card-more">中国最早的成系统文字 <span class="arrow">→</span></span><span class="hs-card-era-icon">🐢</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hs-node-dot"><div class="hs-dot-ring"></div><div class="hs-dot-ring-2"></div><div class="hs-dot-core"></div><div class="hs-dot-year">前1600</div></div>
+        <div class="hs-node-spacer"></div>
+        <div class="hs-connector"></div>
+      </div>
+
+      <!-- 节点2 -->
+      <div class="hs-node hs-right animate-on-scroll" data-year="前1046">
+        <div class="hs-node-spacer"></div>
+        <div class="hs-node-dot"><div class="hs-dot-ring"></div><div class="hs-dot-ring-2"></div><div class="hs-dot-core"></div><div class="hs-dot-year">前1046</div></div>
+        <div class="hs-node-content">
+          <div class="hs-card" data-oracle="鼎">
+            <div class="hs-card-glow"></div>
+            <div class="hs-card-inner">
+              <div class="hs-card-header"><div class="hs-era-badge">西周</div><div class="hs-year-large">约公元前1046年</div></div>
+              <h3 class="hs-card-title">金文时代</h3>
+              <p class="hs-card-desc">西周时期，文字开始铸造在<strong>青铜器</strong>上，称为<strong>金文</strong>或钟鼎文。字形趋于规整，线条更加圆润流畅，是<strong>书法艺术的重要起源</strong>。金文记录了西周的典章制度、分封诸侯、征伐记功等重要史料。</p>
+              <div style="margin-bottom:14px"><span class="hs-key-data"><span class="kd-icon">🏺</span> 青铜铸文</span><span class="hs-key-data"><span class="kd-icon">✒️</span> 书法起源</span></div>
+              <div class="hs-card-tags"><span class="hs-tag">钟鼎文</span><span class="hs-tag">青铜器</span><span class="hs-tag">典章制度</span></div>
+              <div class="hs-card-footer"><span class="hs-card-more">文字铸于青铜 <span class="arrow">→</span></span><span class="hs-card-era-icon">🏺</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hs-connector"></div>
+      </div>
+
+      <!-- 节点3 -->
+      <div class="hs-node hs-left animate-on-scroll" data-year="前221">
+        <div class="hs-node-content">
+          <div class="hs-card" data-oracle="書">
+            <div class="hs-card-glow"></div>
+            <div class="hs-card-inner">
+              <div class="hs-card-header"><div class="hs-era-badge">秦代</div><div class="hs-year-large">公元前221年</div></div>
+              <h3 class="hs-card-title">书同文——小篆统一</h3>
+              <p class="hs-card-desc">秦始皇统一六国后，丞相<strong>李斯</strong>主持文字统一，创制<strong>小篆</strong>作为官方文字。这是中国历史上<strong>第一次大规模的文字标准化运动</strong>，从此结束了战国时期文字异形的混乱局面。</p>
+              <div style="margin-bottom:14px"><span class="hs-key-data"><span class="kd-icon">👤</span> 李斯主持</span><span class="hs-key-data"><span class="kd-icon">📐</span> 文字标准化</span></div>
+              <div class="hs-card-tags"><span class="hs-tag">书同文</span><span class="hs-tag">小篆</span><span class="hs-tag">秦始皇</span><span class="hs-tag">六国统一</span></div>
+              <div class="hs-card-footer"><span class="hs-card-more">首次文字标准化 <span class="arrow">→</span></span><span class="hs-card-era-icon">📜</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hs-node-dot"><div class="hs-dot-ring"></div><div class="hs-dot-ring-2"></div><div class="hs-dot-core"></div><div class="hs-dot-year">前221</div></div>
+        <div class="hs-node-spacer"></div>
+        <div class="hs-connector"></div>
+      </div>
+
+      <!-- 节点4 高亮 -->
+      <div class="hs-node hs-right animate-on-scroll" data-year="1899">
+        <div class="hs-node-spacer"></div>
+        <div class="hs-node-dot"><div class="hs-dot-ring"></div><div class="hs-dot-ring-2"></div><div class="hs-dot-core"></div><div class="hs-dot-year">1899</div></div>
+        <div class="hs-node-content">
+          <div class="hs-card hs-card-highlight" data-oracle="龍">
+            <div class="hs-card-glow"></div>
+            <div class="hs-card-inner">
+              <div class="hs-card-header"><div class="hs-era-badge hs-era-highlight">清代 · 历史转折</div><div class="hs-year-large">1899年</div></div>
+              <h3 class="hs-card-title">甲骨文重见天日</h3>
+              <p class="hs-card-desc">清代金石学家<strong>王懿荣</strong>患疟疾抓药，在中药"龙骨"上发现刻划符号，以学者的敏锐判定为<strong>上古文字</strong>，重金收购。此前数十年，无数甲骨被当作药材碾碎入药，造成无法估量的损失。殷墟甲骨文由此重现于世，<strong>震惊学术界</strong>。</p>
+              <div style="margin-bottom:14px"><span class="hs-key-data"><span class="kd-icon">👤</span> 王懿荣发现</span><span class="hs-key-data"><span class="kd-icon">🦴</span> 15万片出土</span><span class="hs-key-data"><span class="kd-icon">✍️</span> 4500个单字</span></div>
+              <div class="hs-card-tags"><span class="hs-tag">甲骨文之父</span><span class="hs-tag">龙骨</span><span class="hs-tag">殷墟</span><span class="hs-tag">安阳小屯</span><span class="hs-tag">YH127窖穴</span></div>
+              <div class="hs-card-footer"><span class="hs-card-more">惊天发现 · 改写中国历史 <span class="arrow">→</span></span><span class="hs-card-era-icon">🔥</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hs-connector"></div>
+      </div>
+
+      <!-- 节点5 高亮 -->
+      <div class="hs-node hs-left animate-on-scroll" data-year="2017">
+        <div class="hs-node-content">
+          <div class="hs-card hs-card-highlight" data-oracle="世">
+            <div class="hs-card-glow"></div>
+            <div class="hs-card-inner">
+              <div class="hs-card-header"><div class="hs-era-badge hs-era-highlight">现代 · 世界荣耀</div><div class="hs-year-large">2017年</div></div>
+              <h3 class="hs-card-title">入选世界记忆名录</h3>
+              <p class="hs-card-desc">联合国教科文组织将甲骨文列入<strong>《世界记忆名录》</strong>，标志着这一中华文明瑰宝获得<strong>全世界的认可与保护</strong>。甲骨文不仅是中国的文化遗产，更成为全人类共同的精神财富。</p>
+              <div style="margin-bottom:14px"><span class="hs-key-data"><span class="kd-icon">🌍</span> 联合国教科文组织</span><span class="hs-key-data"><span class="kd-icon">🏆</span> 世界记忆名录</span></div>
+              <div class="hs-card-tags"><span class="hs-tag">UNESCO</span><span class="hs-tag">人类遗产</span><span class="hs-tag">文明瑰宝</span><span class="hs-tag">世界认可</span></div>
+              <div class="hs-card-footer"><span class="hs-card-more">全人类共同的文化遗产 <span class="arrow">→</span></span><span class="hs-card-era-icon">🌏</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hs-node-dot"><div class="hs-dot-ring"></div><div class="hs-dot-ring-2"></div><div class="hs-dot-core"></div><div class="hs-dot-year">2017</div></div>
+        <div class="hs-node-spacer"></div>
+        <div class="hs-connector"></div>
+      </div>
+    </div>
+
+    <div class="hs-bottom animate-on-scroll">
+      <div class="hs-quote">
+        <div class="hs-quote-mark">"</div>
+        <p>甲骨文是世界四大古文字中，<strong>唯一没有中断</strong>、至今仍能被破译、被传承的古文字——<br>它是东方文明最古老、最璀璨、最不朽的密码。</p>
+      </div>
+      <div class="hs-cta-group">
+        <a href="/history.html" class="hs-cta-btn hs-cta-btn-primary"><span>深入了解甲骨文</span><span class="hs-cta-arrow">→</span></a>
+        <a href="/oracle.html" class="hs-cta-btn"><span>甲骨文字馆</span><span class="hs-cta-arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+    <div class="flow-divider"><canvas class="flow-canvas"></canvas></div>
+  <!-- ===== 甲骨文字 · 无限流动版 ===== -->
+  <section class="sec oracle-flow-sec" id="oraclePreview">
+    <!-- 背景 -->
+    <div class="of-bg">
+      <div class="of-radial"></div>
+      <div class="of-noise"></div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="of-header animate-on-scroll">
+      <div class="of-label">ORACLE BONES</div>
+      <h2 class="of-title">探索 <span class="of-gold">象形之美</span></h2>
+      <div class="of-div"><span></span></div>
+      <p class="of-subtitle">每一个象形符号都是先民对世界的观察与描绘</p>
+    </div>
+
+    <!-- 流动区域 -->
+    <div class="of-marquee-zone">
+      <!-- 发光扫描线 -->
+      <div class="of-scanline"></div>
+
+      <!-- 左右渐隐遮罩 -->
+      <div class="of-fade of-fade-l"></div>
+      <div class="of-fade of-fade-r"></div>
+
+      <!-- 第一行：向左流动 -->
+      <div class="of-row" data-direction="left" data-speed="30">
+        <div class="of-track" id="ofTrack1"></div>
+      </div>
+
+      <!-- 第二行：向右流动 -->
+      <div class="of-row" data-direction="right" data-speed="35">
+        <div class="of-track" id="ofTrack2"></div>
+      </div>
+
+      <!-- 第三行：向左流动（更快） -->
+      <div class="of-row" data-direction="left" data-speed="25">
+        <div class="of-track" id="ofTrack3"></div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="of-cta animate-on-scroll">
+      <a href="/oracle.html" class="of-cta-btn">
+        <span>进入甲骨文字馆</span>
+        <span class="of-cta-arrow">→</span>
+      </a>
+    </div>
+  </section>
+    <div class="flow-divider"><canvas class="flow-canvas"></canvas></div>
+  <!-- 分类 -->
+  <section class="sec" id="categories">
+    <div class="sec-hd">
+      <div class="sec-label animate-on-scroll">CATEGORIES</div>
+      <h2 class="sec-title animate-on-scroll">探索 <span class="gold-text">文创世界</span></h2>
+      <div class="sec-div"></div>
+      <p class="sec-desc animate-on-scroll delay-1">从书法到篆刻，从文具到器物，每一个类目都是文化的传承</p>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </section>
+    <div class="flow-divider"><canvas class="flow-canvas"></canvas></div>
+  <!-- 精选 -->
+  <section class="sec">
+    <div class="sec-hd">
+      <div class="sec-label animate-on-scroll">FEATURED</div>
+      <h2 class="sec-title animate-on-scroll">精选 <span class="gold-text">推荐</span></h2>
+      <div class="sec-div"></div>
+      <p class="sec-desc animate-on-scroll delay-1">甄选最受欢迎的文创佳品</p>
+    </div>
+    <div class="feat-grid" id="featGrid"></div>
+    <div style="text-align:center;margin-top:50px" class="animate-on-scroll">
+      <a href="/products.html" class="btn btn-outline" style="padding:14px 40px;letter-spacing:3px">查看全部产品 →</a>
+    </div>
+  </section>
+
+    <!-- ===== 品牌理念 · 终极升级版 ===== -->
+    <div class="flow-divider"><canvas class="flow-canvas"></canvas></div>
+  <section class="sec philo-sec" id="philosophy">
+    <!-- 多层背景系统 -->
+    <div class="ph-bg">
+      <div class="ph-grid"></div>
+      <div class="ph-radials"></div>
+      <div class="ph-float-chars" id="phFloatChars"></div>
+      <div class="ph-particles" id="phParticles"></div>
+      <div class="ph-horizon"></div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="ph-header animate-on-scroll">
+      <div class="ph-label">PHILOSOPHY</div>
+      <h2 class="ph-title">品牌<span class="ph-gold">理念</span></h2>
+      <div class="ph-title-line"><span></span></div>
+      <p class="ph-subtitle">以文化为魂，以匠心为骨，以美学为形<br>让三千年的古老智慧，在现代生活中璀璨重生</p>
+    </div>
+
+    <!-- 三大理念卡片 -->
+    <div class="ph-cards" id="phCards">
+
+      <!-- 卡片1：文化传承 -->
+      <div class="ph-card animate-on-scroll" data-index="0">
+        <div class="ph-card-bg"></div>
+        <div class="ph-card-border"></div>
+        <div class="ph-card-glow"></div>
+        <div class="ph-card-content">
+          <!-- 顶部装饰 -->
+          <div class="ph-card-top">
+            <div class="ph-card-num">01</div>
+            <div class="ph-card-line-h"></div>
+          </div>
+          <!-- 核心汉字 -->
+          <div class="ph-oracle-wrap">
+            <div class="ph-oracle-ring"></div>
+            <div class="ph-oracle-ring ph-ring-2"></div>
+            <div class="ph-oracle-char">文</div>
+          </div>
+          <!-- 标题 -->
+          <h3 class="ph-card-title">文化传承</h3>
+          <div class="ph-card-en">Cultural Heritage</div>
+          <!-- 描述 -->
+          <p class="ph-card-desc">
+            每一件产品都承载着中华文明的智慧结晶，让古老文字在现代生活中重新焕发生机。
+          </p>
+          <!-- 细节列表 -->
+          <ul class="ph-card-list">
+            <li><span class="ph-li-dot"></span>甲骨文元素深度融入</li>
+            <li><span class="ph-li-dot"></span>三千年文脉一脉相承</li>
+            <li><span class="ph-li-dot"></span>传统文化现代表达</li>
+          </ul>
+          <!-- 底部标签 -->
+          <div class="ph-card-tags">
+            <span class="ph-tag">文明基因</span>
+            <span class="ph-tag">古今对话</span>
+          </div>
+          <!-- 装饰底线 -->
+          <div class="ph-card-bottom-line"></div>
+        </div>
+      </div>
+
+      <!-- 卡片2：匠心独运（中间高亮） -->
+      <div class="ph-card ph-card-center animate-on-scroll delay-1" data-index="1">
+        <div class="ph-card-bg"></div>
+        <div class="ph-card-border"></div>
+        <div class="ph-card-glow"></div>
+        <div class="ph-card-crown">核心理念</div>
+        <div class="ph-card-content">
+          <div class="ph-card-top">
+            <div class="ph-card-num">02</div>
+            <div class="ph-card-line-h"></div>
+          </div>
+          <div class="ph-oracle-wrap">
+            <div class="ph-oracle-ring"></div>
+            <div class="ph-oracle-ring ph-ring-2"></div>
+            <div class="ph-oracle-char">匠</div>
+          </div>
+          <h3 class="ph-card-title">匠心独运</h3>
+          <div class="ph-card-en">Craftsmanship & Ingenuity</div>
+          <p class="ph-card-desc">
+            坚持原创设计与传统工艺的完美结合，每一处细节都经过精心打磨与淬炼。
+          </p>
+          <ul class="ph-card-list">
+            <li><span class="ph-li-dot"></span>100%原创设计</li>
+            <li><span class="ph-li-dot"></span>传统工艺精心淬炼</li>
+            <li><span class="ph-li-dot"></span>细节决定品质</li>
+          </ul>
+          <div class="ph-card-tags">
+            <span class="ph-tag">原创设计</span>
+            <span class="ph-tag">极致工艺</span>
+          </div>
+          <div class="ph-card-bottom-line"></div>
+        </div>
+      </div>
+
+      <!-- 卡片3：美学追求 -->
+      <div class="ph-card animate-on-scroll delay-2" data-index="2">
+        <div class="ph-card-bg"></div>
+        <div class="ph-card-border"></div>
+        <div class="ph-card-glow"></div>
+        <div class="ph-card-content">
+          <div class="ph-card-top">
+            <div class="ph-card-num">03</div>
+            <div class="ph-card-line-h"></div>
+          </div>
+          <div class="ph-oracle-wrap">
+            <div class="ph-oracle-ring"></div>
+            <div class="ph-oracle-ring ph-ring-2"></div>
+            <div class="ph-oracle-char">美</div>
+          </div>
+          <h3 class="ph-card-title">美学追求</h3>
+          <div class="ph-card-en">Aesthetic Pursuit</div>
+          <p class="ph-card-desc">
+            将东方美学融入现代设计语言，创造兼具实用性与艺术性的文创产品。
+          </p>
+          <ul class="ph-card-list">
+            <li><span class="ph-li-dot"></span>东方美学现代演绎</li>
+            <li><span class="ph-li-dot"></span>实用与艺术完美平衡</li>
+            <li><span class="ph-li-dot"></span>生活即是美学</li>
+          </ul>
+          <div class="ph-card-tags">
+            <span class="ph-tag">东方美学</span>
+            <span class="ph-tag">艺术生活</span>
+          </div>
+          <div class="ph-card-bottom-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部品牌宣言 -->
+    <div class="ph-manifesto animate-on-scroll">
+      <div class="ph-mani-inner">
+        <div class="ph-mani-quote">"</div>
+        <p class="ph-mani-text">
+          我们相信，<strong>每一个汉字都是一座文明的丰碑</strong>。<br>
+          从三千年前的龟甲兽骨，到今天的每一件文创作品，<br>
+          我们始终在做同一件事——<strong>让文字活着，让文明发光</strong>。
+        </p>
+        <div class="ph-mani-brand">—— 象形文创</div>
+      </div>
+    </div>
+
+    <!-- 底部数据 -->
+    <div class="ph-metrics animate-on-scroll">
+      <div class="ph-metric">
+        <div class="ph-metric-num" data-phcount="100">0<span class="ph-metric-unit">%</span></div>
+        <div class="ph-metric-label">原创设计</div>
+      </div>
+      <div class="ph-metric-div"></div>
+      <div class="ph-metric">
+        <div class="ph-metric-num" data-phcount="3600">0<span class="ph-metric-unit">年</span></div>
+        <div class="ph-metric-label">文化传承</div>
+      </div>
+      <div class="ph-metric-div"></div>
+      <div class="ph-metric">
+        <div class="ph-metric-num" data-phcount="50">0<span class="ph-metric-unit">+</span></div>
+        <div class="ph-metric-label">匠心产品</div>
+      </div>
+      <div class="ph-metric-div"></div>
+      <div class="ph-metric">
+        <div class="ph-metric-num" data-phcount="10000">0<span class="ph-metric-unit">+</span></div>
+        <div class="ph-metric-label">用户信赖</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand"><h3>象形文创</h3><p>传承华夏文明，让古老的象形文字在现代生活中绽放新的光彩。</p></div>
+        <div class="footer-col"><h4>产品</h4><ul><li><a href="/products.html">全部产品</a></li><li><a href="/oracle.html">甲骨文字馆</a></li><li><a href="/products.html?category=书法艺术">书法艺术</a></li><li><a href="/products.html?category=创意文具">创意文具</a></li></ul></div>
+        <div class="footer-col"><h4>关于</h4><ul><li><a href="/history.html">甲骨文千年之旅</a></li><li><a href="#">品牌故事</a></li><li><a href="#">联系我们</a></li></ul></div>
+        <div class="footer-col"><h4>帮助</h4><ul><li><a href="#">配送说明</a></li><li><a href="#">退换政策</a></li><li><a href="#">常见问题</a></li></ul></div>
+      </div>
+      <div class="footer-bottom"><span>© 2024 象形文创 · 传承华夏文明</span><span>用心传承每一笔</span></div>
+    </div>
+  </footer>
+    <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/animations.js"></script>
+  <script>
+    const O=['龍','鳳','禾','鼎','壽','福','祿','喜','文','墨','書','道','藝','雅','和','美','德','仁'];
+
+    // 加载页
+    window.addEventListener('load',()=>{setTimeout(()=>{const l=document.getElementById('ld');if(l){l.classList.add('out');setTimeout(()=>l.remove(),800)}},800)});
+    setTimeout(()=>{const l=document.getElementById('ld');if(l&&l.parentNode){l.classList.add('out');setTimeout(()=>{if(l.parentNode)l.remove()},800)}},3500);
+
+    // 鼠标光
+    const glow=document.getElementById('gGlow');
+    document.addEventListener('mousemove',e=>{if(glow){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'}});
+
+    // Hero 速度线
+    (function(){const c=document.getElementById('speedLines');if(!c)return;for(let i=0;i<12;i++){const l=document.createElement('div');l.className='speed-line';l.style.setProperty('--x',(5+Math.random()*90)+'%');l.style.setProperty('--dur',(4+Math.random()*6)+'s');l.style.animationDelay=(Math.random()*5)+'s';c.appendChild(l)}})();
+
+    // Hero 浮动字
+    (function(){const c=document.getElementById('floatingChars');if(!c)return;const ch=['龍','鳳','壽','福','鼎','文','道','書','藝','雅','禾','祿','喜','美','德','仁','和','匠','古','甲'];for(let i=0;i<22;i++){const s=document.createElement('span');s.className='fc';s.textContent=ch[i%ch.length];s.style.fontSize=(3+Math.random()*10)+'rem';s.style.left=(2+Math.random()*96)+'%';s.style.top=(2+Math.random()*96)+'%';s.style.transform=`rotate(${-25+Math.random()*50}deg)`;c.appendChild(s)}
+    document.addEventListener('mousemove',e=>{c.querySelectorAll('.fc').forEach(ch=>{const r=ch.getBoundingClientRect();const d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2));ch.classList.toggle('lit',d<250)})})})();
+
+    // =============================================
+    // 千年之旅 · 终极版交互
+    // =============================================
+
+    // 背景浮动字
+    (function(){
+      const c=document.getElementById('hsOracles');if(!c)return;
+      const chars=['甲','骨','文','卜','辭','殷','鼎','龍','鳳','壽','福','祀','戎','禾','書','契','兆','龜','美','德','道'];
+      for(let i=0;i<24;i++){const s=document.createElement('span');s.className='hs-float-char';s.textContent=chars[i%chars.length];s.style.fontSize=(4+Math.random()*13)+'rem';s.style.left=(Math.random()*100)+'%';s.style.top=(Math.random()*100)+'%';s.style.transform='rotate('+(Math.random()*60-30)+'deg)';c.appendChild(s)}
+      let raf;document.addEventListener('mousemove',e=>{if(raf)return;raf=requestAnimationFrame(()=>{c.querySelectorAll('.hs-float-char').forEach(ch=>{const r=ch.getBoundingClientRect();const d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2));ch.classList.toggle('lit',d<320)});raf=null})});
+    })();
+
+    // 速度线
+    (function(){const c=document.getElementById('hsLines');if(!c)return;for(let i=0;i<12;i++){const l=document.createElement('div');l.className='hs-speed-line';l.style.setProperty('--lx',(3+Math.random()*94)+'%');l.style.setProperty('--dur',(5+Math.random()*9)+'s');l.style.animationDelay=(Math.random()*7)+'s';c.appendChild(l)}})();
+
+    // 粒子
+    (function(){const c=document.getElementById('hsParticles');if(!c)return;for(let i=0;i<30;i++){const p=document.createElement('div');p.className='hs-particle';p.style.left=(Math.random()*100)+'%';p.style.top=(20+Math.random()*70)+'%';p.style.setProperty('--pd',(3+Math.random()*5)+'s');p.style.setProperty('--delay',(Math.random()*5)+'s');p.style.width=(1+Math.random()*2)+'px';p.style.height=p.style.width;c.appendChild(p)}})();
+
+    // 轴线填充+光点
+    (function(){
+      const axis=document.getElementById('hsAxisFill'),glowEl=document.getElementById('hsAxisGlow'),timeline=document.getElementById('hsTimeline');
+      if(!axis||!timeline)return;
+      function updateAxis(){const rect=timeline.getBoundingClientRect(),viewH=window.innerHeight;if(rect.top>viewH||rect.bottom<0){axis.style.height='0';if(glowEl)glowEl.style.opacity='0';return}const start=Math.max(0,viewH-rect.top),total=rect.height,pct=Math.min(start/total*100,100);axis.style.height=pct+'%';if(glowEl){glowEl.style.opacity=pct>2&&pct<98?'1':'0';glowEl.style.top=pct+'%'}}
+      window.addEventListener('scroll',updateAxis,{passive:true});updateAxis();
+    })();
+
+    // 卡片光标追踪
+    document.querySelectorAll('.hs-card').forEach(card=>{card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--cx',((e.clientX-r.left)/r.width*100)+'%');card.style.setProperty('--cy',((e.clientY-r.top)/r.height*100)+'%')})});
+
+    // 节点进入动画
+    (function(){const obs=new IntersectionObserver(entries=>{entries.forEach(en=>{if(en.isIntersecting)en.target.classList.add('visible')})},{threshold:.15,rootMargin:'0px 0px -80px 0px'});document.querySelectorAll('.hs-node').forEach(el=>obs.observe(el))})();
+
+    // 千年之旅统计计数
+    (function(){const obs=new IntersectionObserver(entries=>{entries.forEach(en=>{if(en.isIntersecting){const el=en.target,target=parseInt(el.dataset.count);if(!target||el.dataset.done)return;el.dataset.done='1';const parent=el.closest('.hs-stat');if(parent)setTimeout(()=>parent.classList.add('counted'),200);const dur=2400,start=Date.now();(function tick(){const p=Math.min((Date.now()-start)/dur,1),eased=1-Math.pow(1-p,4),val=Math.floor(target*eased);el.textContent=val.toLocaleString();if(p<1)requestAnimationFrame(tick);else el.textContent=target.toLocaleString()})();obs.unobserve(el)}})},{threshold:.5});document.querySelectorAll('.hs-stat-num[data-count]').forEach(el=>obs.observe(el))})();
+
+    // 卡片微视差
+    (function(){const cards=document.querySelectorAll('.hs-card');if(!cards.length)return;document.addEventListener('mousemove',e=>{const cx=e.clientX/window.innerWidth-.5,cy=e.clientY/window.innerHeight-.5;cards.forEach(card=>{const r=card.getBoundingClientRect();if(r.top<window.innerHeight&&r.bottom>0){const isHover=card.matches(':hover');card.style.transform=isHover?`translateY(-8px) scale(1.01) translate(${cx*3}px,${cy*2}px)`:`translate(${cx*1.5}px,${cy*1}px)`}})})})();
+
+    // =============================================
+    // 其余板块
+    // =============================================
+
+    // 甲骨文展示
+    async function loadOracle(){try{const data=await API.getRandomOracle(8);const g=document.getElementById('oracleRow');if(!data.items||!data.items.length)return;g.innerHTML=data.items.map((item,i)=>{let img='';if(item.image_url&&item.image_url.trim()){img=`<img src="${item.image_url}" alt="${item.hanzi}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="os-card-char" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">${item.hanzi}</div>`}else{img=`<div class="os-card-char">${item.hanzi}</div>`}return`<div class="os-card animate-on-scroll" style="transition-delay:${i*.06}s" onclick="location.href='/oracle.html'"><div class="os-glow"></div><div class="os-card-img" style="position:relative">${img}</div><div class="os-hanzi">${item.hanzi}</div><div class="os-pinyin">${item.pinyin}</div></div>`}).join('');g.querySelectorAll('.os-card').forEach(card=>{card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%')})});setTimeout(()=>{if(window.animEngine)window.animEngine.observeNewElements()},100)}catch(e){console.error(e)}}
+
+    // 分类
+    async function loadCats(){try{const d=await API.getCategories();const g=document.getElementById('catGrid');if(!d.categories||!d.categories.length)return;const ic={'书法艺术':'書','创意文具':'文','服饰配件':'衣','篆刻艺术':'印','生活器具':'器','益智玩具':'戏','文房雅器':'墨'};g.innerHTML=d.categories.map((c,i)=>`<div class="cat-card animate-on-scroll" style="transition-delay:${i*.08}s" onclick="location.href='/products.html?category=${encodeURIComponent(c)}'"><div class="cat-bg">${ic[c]||O[i%O.length]}</div><div class="cat-card-inner"><div class="cat-name">${c}</div><div class="cat-more">探索更多 →</div></div></div>`).join('');setTimeout(()=>{if(window.animEngine)window.animEngine.observeNewElements()},100)}catch(e){console.error(e)}}
+
+    // 精选
+    async function loadFeat(){try{let d=await API.getProducts({featured:'1',limit:6});if(!d.products||!d.products.length)d=await API.getProducts({limit:6});if(!d.products||!d.products.length)return;const g=document.getElementById('featGrid');g.innerHTML=d.products.map((p,i)=>{const disc=p.original_price>p.price?Math.round((1-p.price/p.original_price)*100):0;const stars='★'.repeat(Math.floor(p.rating||5));const ph=O[p.id%O.length],hc=O[(p.id+7)%O.length];let img='';if(p.image&&p.image.trim()){img=`<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="fc2-ph" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">${ph}</div>`}else{img=`<div class="fc2-ph">${ph}</div>`}return`<div class="fc2 animate-on-scroll" style="transition-delay:${i*.1}s" onclick="location.href='/product-detail.html?id=${p.id}'"><div class="cg"></div><div class="fc2-img"><div class="fc2-hover-o">${hc}</div>${img}${disc>0?`<div class="fc2-badge">-${disc}%</div>`:''}<div class="fc2-hover"><div class="fc2-btns"><button class="fmain" onclick="event.stopPropagation();qAdd(${p.id})">加入购物车</button><button onclick="event.stopPropagation();qFav(${p.id})">♡ 收藏</button></div></div></div><div class="fc2-body"><div class="fc2-cat">${p.category||'文创'}</div><div class="fc2-name">${p.name}</div><div class="fc2-foot"><div class="fc2-price">¥${p.price}${p.original_price>p.price?`<span class="old">¥${p.original_price}</span>`:''}</div><div class="fc2-rate"><span class="stars">${stars}</span> ${(p.rating||5).toFixed(1)}</div></div></div></div>`}).join('');g.querySelectorAll('.fc2').forEach(card=>{card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%')})});setTimeout(()=>{if(window.animEngine)window.animEngine.observeNewElements()},100)}catch(e){console.error(e)}}
+
+    async function qAdd(id){if(!Auth.requireLogin())return;try{await API.addToCart(id,1);showToast('已加入购物车 🛒','success')}catch(e){showToast(e.message,'error')}}
+    async function qFav(id){if(!Auth.requireLogin())return;try{await API.addFavorite(id);showToast('已收藏 ♥','success')}catch(e){showToast(e.message,'error')}}
+
+    // 顶部统计计数
+    function initCounters(){const obs=new IntersectionObserver(entries=>{entries.forEach(en=>{if(en.isIntersecting){const el=en.target,target=parseInt(el.dataset.target);if(!target)return;const suffix=el.textContent.replace(/[0-9,]/g,''),dur=2000,start=Date.now();(function up(){const p=Math.min((Date.now()-start)/dur,1),eased=1-Math.pow(1-p,4);el.textContent=Math.floor(target*eased).toLocaleString()+suffix;if(p<1)requestAnimationFrame(up)})();obs.unobserve(el)}})},{threshold:.5});document.querySelectorAll('.stat-num[data-target]').forEach(el=>obs.observe(el))}
+
+    document.addEventListener('DOMContentLoaded',()=>{loadOracle();loadCats();loadFeat();initCounters()});
+  
+      // =============================================
+    // 品牌理念 · 终极版交互
+    // =============================================
+
+    // 背景浮动字
+    (function(){
+      const c=document.getElementById('phFloatChars');
+      if(!c)return;
+      const chars=['文','匠','美','道','德','藝','雅','韻','心','品','創','華','禮','智','信','仁'];
+      for(let i=0;i<18;i++){
+        const s=document.createElement('span');
+        s.className='ph-fc';
+        s.textContent=chars[i%chars.length];
+        s.style.fontSize=(3+Math.random()*10)+'rem';
+        s.style.left=(Math.random()*100)+'%';
+        s.style.top=(Math.random()*100)+'%';
+        s.style.transform='rotate('+(Math.random()*50-25)+'deg)';
+        c.appendChild(s);
+      }
+      let raf;
+      document.addEventListener('mousemove',e=>{
+        if(raf)return;
+        raf=requestAnimationFrame(()=>{
+          c.querySelectorAll('.ph-fc').forEach(ch=>{
+            const r=ch.getBoundingClientRect();
+            const d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2));
+            ch.classList.toggle('glow',d<300);
+          });
+          raf=null;
+        });
+      });
+    })();
+
+    // 粒子
+    (function(){
+      const c=document.getElementById('phParticles');
+      if(!c)return;
+      for(let i=0;i<24;i++){
+        const p=document.createElement('div');
+        p.className='ph-pt';
+        p.style.left=(Math.random()*100)+'%';
+        p.style.top=(20+Math.random()*70)+'%';
+        p.style.setProperty('--d',(3+Math.random()*5)+'s');
+        p.style.setProperty('--dl',(Math.random()*5)+'s');
+        c.appendChild(p);
+      }
+    })();
+
+    // 卡片光标追踪
+    document.querySelectorAll('.ph-card').forEach(card=>{
+      card.addEventListener('mousemove',e=>{
+        const r=card.getBoundingClientRect();
+        const mx=((e.clientX-r.left)/r.width*100);
+        const my=((e.clientY-r.top)/r.height*100);
+        card.style.setProperty('--mx',mx+'%');
+        card.style.setProperty('--my',my+'%');
+      });
+    });
+
+    // 卡片3D倾斜效果
+    document.querySelectorAll('.ph-card').forEach(card=>{
+      card.addEventListener('mousemove',e=>{
+        const r=card.getBoundingClientRect();
+        const x=(e.clientX-r.left)/r.width-.5;
+        const y=(e.clientY-r.top)/r.height-.5;
+        const base=card.classList.contains('ph-card-center')?-28:-12;
+        card.style.transform=`translateY(${base}px) perspective(800px) rotateY(${x*6}deg) rotateX(${-y*6}deg)`;
+      });
+      card.addEventListener('mouseleave',()=>{
+        const base=card.classList.contains('ph-card-center')?-16:0;
+        card.style.transform=`translateY(${base}px) perspective(800px) rotateY(0deg) rotateX(0deg)`;
+      });
+    });
+
+    // 底部数据计数器
+    (function(){
+      const obs=new IntersectionObserver(entries=>{
+        entries.forEach(en=>{
+          if(en.isIntersecting){
+            const el=en.target;
+            const target=parseInt(el.dataset.phcount);
+            if(!target||el.dataset.done)return;
+            el.dataset.done='1';
+            const unit=el.querySelector('.ph-metric-unit');
+            const unitText=unit?unit.textContent:'';
+            const dur=2000,start=Date.now();
+            (function tick(){
+              const p=Math.min((Date.now()-start)/dur,1);
+              const eased=1-Math.pow(1-p,4);
+              const val=Math.floor(target*eased);
+              el.innerHTML=val.toLocaleString()+(unitText?'<span class="ph-metric-unit">'+unitText+'</span>':'');
+              if(p<1)requestAnimationFrame(tick);
+              else el.innerHTML=target.toLocaleString()+(unitText?'<span class="ph-metric-unit">'+unitText+'</span>':'');
+            })();
+            obs.unobserve(el);
+          }
+        });
+      },{threshold:0.5});
+      document.querySelectorAll('[data-phcount]').forEach(el=>obs.observe(el));
+    })();
+
+    // 汉字呼吸发光
+    (function(){
+      const chars=document.querySelectorAll('.ph-oracle-char');
+      let t=0;
+      function breathe(){
+        t+=0.02;
+        chars.forEach((ch,i)=>{
+          const phase=t+i*2;
+          const brightness=0.15+Math.sin(phase)*0.08;
+          if(!ch.closest('.ph-card:hover')){
+            ch.style.filter=`drop-shadow(0 0 ${10+Math.sin(phase)*8}px rgba(212,175,55,${brightness}))`;
+          }
+        });
+        requestAnimationFrame(breathe);
+      }
+      breathe();
+    })();
+    // =============================================
+    // 甲骨文字 · 无限流动（象形文字版）
+    // =============================================
+    (function(){
+      // 甲骨文字数据：oracle用图片路径（SVG内联），modern为现代汉字，pinyin为拼音
+      // 使用内联SVG绘制简化的甲骨文象形符号
+      const oracleChars = [
+        {modern:'日',pinyin:'rì',paths:'M12 4h26v26H12zM18 13h14M18 20h14',vb:'0 0 50 34'},
+        {modern:'月',pinyin:'yuè',paths:'M20 2C14 2 10 8 10 17s4 15 10 15c-3-3-4-8-4-15s1-12 4-15zM14 11h8M14 20h8',vb:'0 0 34 36'},
+        {modern:'山',pinyin:'shān',paths:'M25 32V4M10 32V14M40 32V14',vb:'0 0 50 36'},
+        {modern:'水',pinyin:'shuǐ',paths:'M25 2v30M10 10c5 4 8 12 2 20M40 10c-5 4-8 12-2 20M6 16c2 2 4 6 2 10M44 16c-2 2-4 6-2 10',vb:'0 0 50 36'},
+        {modern:'火',pinyin:'huǒ',paths:'M25 2L25 30M18 8c-6 8-8 14-4 22M32 8c6 8 8 14 4 22M12 20c0 6 2 10 6 12M38 20c0 6-2 10-6 12',vb:'0 0 50 36'},
+        {modern:'木',pinyin:'mù',paths:'M25 2v32M8 18L25 10 42 18M25 22L14 32M25 22L36 32',vb:'0 0 50 36'},
+        {modern:'人',pinyin:'rén',paths:'M25 4L12 34M25 4L38 34',vb:'0 0 50 38'},
+        {modern:'大',pinyin:'dà',paths:'M25 2v32M6 16h38M25 20L10 34M25 20L40 34',vb:'0 0 50 38'},
+        {modern:'天',pinyin:'tiān',paths:'M10 6h30M25 6v28M8 18h34',vb:'0 0 50 38'},
+        {modern:'目',pinyin:'mù',paths:'M14 4h22v28H14zM14 12h22M14 20h22',vb:'0 0 50 36'},
+        {modern:'口',pinyin:'kǒu',paths:'M12 8h26v22H12z',vb:'0 0 50 38'},
+        {modern:'手',pinyin:'shǒu',paths:'M10 10h30M15 18h20M20 4v28M28 8v10',vb:'0 0 50 36'},
+        {modern:'牛',pinyin:'niú',paths:'M14 4v10M36 4v10M8 14h34M25 14v22M18 22h14',vb:'0 0 50 40'},
+        {modern:'马',pinyin:'mǎ',paths:'M12 6c10-2 20 0 26 8v14c0 4-4 6-8 6H18c-4 0-6-2-6-6V14c2-4 6-8 0-8zM14 18h22M32 28v6',vb:'0 0 50 40'},
+        {modern:'鸟',pinyin:'niǎo',paths:'M20 4c8 0 14 4 14 10v8c0 6-6 10-14 10h-4c-6 0-8-4-8-10V14c0-6 4-10 12-10zM14 16h20M10 28L8 34M38 28l2 6',vb:'0 0 50 40'},
+        {modern:'鱼',pinyin:'yú',paths:'M14 6c12-4 22 0 22 12s-10 16-22 12c-6-2-8-8-8-12s2-10 8-12zM14 18h22M34 24l6 8M34 12l6-4',vb:'0 0 50 40'},
+        {modern:'龙',pinyin:'lóng',paths:'M16 4c16 0 20 8 20 16s-4 10-12 14M16 4c-4 4-6 10-4 16 2 8 8 12 12 14M12 22h18M36 10l4-2M36 16l6 0',vb:'0 0 50 40'},
+        {modern:'龟',pinyin:'guī',paths:'M14 10h22v16H14zM20 6v4M30 6v4M14 18h22M25 10v16M10 14v8M40 14v8M18 26l-4 6M32 26l4 6',vb:'0 0 50 38'},
+        {modern:'虎',pinyin:'hǔ',paths:'M10 6h12v8H10zM10 10h12M22 6c8 0 16 4 16 14v6c0 4-4 8-10 8H18M18 22h16M30 20v6',vb:'0 0 50 38'},
+        {modern:'鹿',pinyin:'lù',paths:'M20 4l5-2 5 2M25 4v12M16 16c-4 6-2 14 4 16M34 16c4 6 2 14-4 16M20 20h10M14 32l-2 4M36 32l2 4',vb:'0 0 50 40'},
+        {modern:'象',pinyin:'xiàng',paths:'M20 4c10-2 18 4 18 14l-2 10c-2 6-8 8-14 8h-6c-4 0-8-4-8-10V16c0-8 4-12 12-12zM12 20l-4 14M36 22h4M16 16h18',vb:'0 0 50 40'},
+        {modern:'羊',pinyin:'yáng',paths:'M16 4l9 10M34 4l-9 10M10 14h30M25 14v20M18 22h14',vb:'0 0 50 38'},
+        {modern:'犬',pinyin:'quǎn',paths:'M20 4L10 32M20 4L34 32M14 18h18M36 8l4-2',vb:'0 0 50 38'},
+        {modern:'禾',pinyin:'hé',paths:'M25 6v28M10 16h30M25 6L14 14M25 6L36 14M25 22L16 34M25 22L34 34',vb:'0 0 50 40'},
+        {modern:'田',pinyin:'tián',paths:'M10 6h30v26H10zM25 6v26M10 19h30',vb:'0 0 50 38'},
+        {modern:'雨',pinyin:'yǔ',paths:'M8 8h34M25 2v6M8 8v4h34v-4M14 16v4M20 20v4M28 16v4M34 20v4M17 26v4M31 26v4',vb:'0 0 50 36'},
+        {modern:'风',pinyin:'fēng',paths:'M12 4c0 0 8 4 26 4M12 4v24c0 4 4 8 12 8s14-2 14-12V12',vb:'0 0 50 40'},
+        {modern:'男',pinyin:'nán',paths:'M10 4h30v12H10zM25 4v12M25 16v18M16 22h18M10 10h30',vb:'0 0 50 38'},
+        {modern:'女',pinyin:'nǚ',paths:'M14 6L36 22M36 6L14 22M25 16v18M12 28h26',vb:'0 0 50 38'},
+        {modern:'子',pinyin:'zǐ',paths:'M10 8h30M25 8v26M16 22h18M25 34l-8 0M25 34l8 0',vb:'0 0 50 40'},
+        {modern:'王',pinyin:'wáng',paths:'M10 6h30M10 18h30M10 30h30M25 6v24',vb:'0 0 50 38'},
+        {modern:'玉',pinyin:'yù',paths:'M10 6h30M10 18h30M10 30h30M25 6v24M30 34l4 4',vb:'0 0 50 42'},
+        {modern:'金',pinyin:'jīn',paths:'M25 2L10 16h30L25 2zM12 22h26M16 28h18M25 16v18',vb:'0 0 50 38'},
+        {modern:'土',pinyin:'tǔ',paths:'M25 6v24M10 30h30M18 18h14',vb:'0 0 50 38'},
+        {modern:'石',pinyin:'shí',paths:'M14 6h22L14 18h26M14 18v16',vb:'0 0 50 38'},
+        {modern:'刀',pinyin:'dāo',paths:'M30 4v26c0 4-4 6-8 6H16M30 18h-8',vb:'0 0 50 40'},
+        {modern:'弓',pinyin:'gōng',paths:'M30 4c-14 0-18 8-18 14s4 14 18 14M16 18h14',vb:'0 0 50 36'},
+        {modern:'矢',pinyin:'shǐ',paths:'M25 2v32M12 14h26M25 2L16 10M25 20h-12l-2 14',vb:'0 0 50 38'},
+        {modern:'鼎',pinyin:'dǐng',paths:'M16 4h4M30 4h4M12 10h26v14H12zM16 24v8M34 24v8M12 17h26',vb:'0 0 50 36'},
+        {modern:'门',pinyin:'mén',paths:'M12 4v30M38 4v30M12 4h26',vb:'0 0 50 38'},
+        {modern:'井',pinyin:'jǐng',paths:'M18 4v32M32 4v32M6 14h38M6 26h38',vb:'0 0 50 40'},
+        {modern:'食',pinyin:'shí',paths:'M25 2L10 12h30L25 2zM14 16h22v16H14zM14 24h22',vb:'0 0 50 36'},
+        {modern:'酒',pinyin:'jiǔ',paths:'M14 4v28M14 4h6M20 4v12c0 6 4 10 10 10h6M20 18h12M8 14l4-4M8 22l4-2',vb:'0 0 50 38'},
+        {modern:'车',pinyin:'chē',paths:'M10 10h30M10 22h30M25 4v28M18 10v12M32 10v12',vb:'0 0 50 36'},
+        {modern:'舟',pinyin:'zhōu',paths:'M8 24C8 24 14 32 25 32s17-8 17-8M10 20h30M25 8v24M20 14h10',vb:'0 0 50 38'},
+        {modern:'春',pinyin:'chūn',paths:'M12 6h26M20 6v10M30 6v10M8 16h34M25 16v6M14 22c4 6 8 10 11 12M36 22c-4 6-8 10-11 12',vb:'0 0 50 38'},
+        {modern:'秋',pinyin:'qiū',paths:'M20 4v30M20 4L10 12M20 14L10 22M28 4c6 4 10 10 10 18M32 14l6 2M32 22l4 6',vb:'0 0 50 38'},
+        {modern:'东',pinyin:'dōng',paths:'M25 2v32M10 10L25 18 40 10M14 22L25 30 36 22',vb:'0 0 50 38'},
+        {modern:'西',pinyin:'xī',paths:'M8 6h34M14 6v8l11 12 11-12V6M25 26v8',vb:'0 0 50 38'},
+        {modern:'南',pinyin:'nán',paths:'M10 4h30M25 4v30M10 14h30v18H10M18 20v6M32 20v6',vb:'0 0 50 38'},
+        {modern:'北',pinyin:'běi',paths:'M22 4v30M28 4v30M22 4L10 18M28 4L40 18',vb:'0 0 50 38'},
+        {modern:'上',pinyin:'shàng',paths:'M25 10v22M12 20h26M10 32h30',vb:'0 0 50 38'},
+        {modern:'下',pinyin:'xià',paths:'M10 6h30M25 6v26M12 18h26',vb:'0 0 50 38'},
+        {modern:'中',pinyin:'zhōng',paths:'M12 8h26v22H12zM25 2v34',vb:'0 0 50 40'},
+        {modern:'寿',pinyin:'shòu',paths:'M10 8h30M10 18h30M10 28h30M25 4v30M18 12h14',vb:'0 0 50 36'},
+        {modern:'福',pinyin:'fú',paths:'M6 4v30M6 18h10M20 8h22v24H20zM20 16h22M20 24h22M31 8v24',vb:'0 0 50 38'},
+        {modern:'美',pinyin:'měi',paths:'M16 4l9 8 9-8M10 16h30M25 12v22M14 22h22M10 34h30',vb:'0 0 50 40'},
+        {modern:'德',pinyin:'dé',paths:'M8 4v30M8 18h8M22 8h20v10H22zM22 22h20v10H22zM32 8v24',vb:'0 0 50 38'},
+        {modern:'爱',pinyin:'ài',paths:'M14 4c6 4 16 4 22 0M10 14h30M25 14v6c-8 4-14 10-14 14M25 20c8 4 14 10 14 14',vb:'0 0 50 38'},
+        {modern:'梦',pinyin:'mèng',paths:'M12 4h10v10H12zM28 4h10v10H28zM8 18h34M18 18v14M32 18v14M14 26h22',vb:'0 0 50 36'},
+        {modern:'家',pinyin:'jiā',paths:'M25 2L8 16h34L25 2zM14 16v18M36 16v18M20 20v8h10v-8M14 34h22',vb:'0 0 50 38'},
+      ];
+
+      function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+      function createSVG(data){
+        const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.setAttribute('viewBox',data.vb);
+        svg.setAttribute('fill','none');
+        svg.setAttribute('stroke','currentColor');
+        svg.setAttribute('stroke-width','2.2');
+        svg.setAttribute('stroke-linecap','round');
+        svg.setAttribute('stroke-linejoin','round');
+        svg.style.width='100%';
+        svg.style.height='100%';
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d',data.paths.split(/(?=[A-Z])/).map(s=>s.trim()).join(''));
+        // 多条路径用M分隔
+        const pathStr=data.paths;
+        pathStr.split(/(?=M)/).forEach(seg=>{
+          const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+          p.setAttribute('d',seg.trim());
+          svg.appendChild(p);
+        });
+        return svg;
+      }
+
+      function createCharEl(data){
+        const el=document.createElement('div');
+        el.className='of-char';
+        
+        const oracleDiv=document.createElement('div');
+        oracleDiv.className='of-char-oracle';
+        oracleDiv.appendChild(createSVG(data));
+        
+        el.innerHTML='';
+        el.appendChild(oracleDiv);
+        
+        const modernDiv=document.createElement('div');
+        modernDiv.className='of-char-modern';
+        modernDiv.textContent=data.modern;
+        el.appendChild(modernDiv);
+        
+        const pinyinDiv=document.createElement('div');
+        pinyinDiv.className='of-char-pinyin';
+        pinyinDiv.textContent=data.pinyin;
+        el.appendChild(pinyinDiv);
+        
+        return el;
+      }
+
+      function fillTrack(trackEl,dataArr,copies){
+        trackEl.innerHTML='';
+        for(let c=0;c<copies;c++){
+          dataArr.forEach(d=>trackEl.appendChild(createCharEl(d)));
+        }
+      }
+
+      const track1=document.getElementById('ofTrack1');
+      const track2=document.getElementById('ofTrack2');
+      const track3=document.getElementById('ofTrack3');
+      if(!track1||!track2||!track3)return;
+
+      const set1=shuffle(oracleChars).slice(0,22);
+      const set2=shuffle(oracleChars).slice(0,22);
+      const set3=shuffle(oracleChars).slice(0,22);
+
+      fillTrack(track1,set1,3);
+      fillTrack(track2,set2,3);
+      fillTrack(track3,set3,3);
+
+      function animateTrack(track,direction,speed){
+        const items=track.querySelectorAll('.of-char');
+        const totalSets=3;
+        const itemsPerSet=items.length/totalSets;
+        let singleWidth=0;
+        for(let i=0;i<itemsPerSet;i++){
+          singleWidth+=items[i].offsetWidth+14;
+        }
+
+        let pos=direction==='left'?0:-singleWidth;
+        let currentSpeed=speed;
+        let targetSpeed=speed;
+
+        track.closest('.of-row').addEventListener('mouseenter',()=>{targetSpeed=0});
+        track.closest('.of-row').addEventListener('mouseleave',()=>{targetSpeed=speed});
+
+        function tick(){
+          currentSpeed+=(targetSpeed-currentSpeed)*0.05;
+          if(direction==='left'){
+            pos-=currentSpeed*0.016;
+            if(pos<=-singleWidth) pos+=singleWidth;
+          }else{
+            pos+=currentSpeed*0.016;
+            if(pos>=0) pos-=singleWidth;
+          }
+          track.style.transform=`translateX(${pos}px)`;
+          requestAnimationFrame(tick);
+        }
+        tick();
+      }
+
+      requestAnimationFrame(()=>{
+        animateTrack(track1,'left',45);
+        animateTrack(track2,'right',35);
+        animateTrack(track3,'left',55);
+      });
+
+      // 鼠标感应发光
+      const zone=document.querySelector('.of-marquee-zone');
+      if(zone){
+        let mraf;
+        zone.addEventListener('mousemove',e=>{
+          if(mraf)return;
+          mraf=requestAnimationFrame(()=>{
+            document.querySelectorAll('.of-char').forEach(ch=>{
+              const r=ch.getBoundingClientRect();
+              const cx=r.left+r.width/2;
+              const cy=r.top+r.height/2;
+              const d=Math.hypot(e.clientX-cx,e.clientY-cy);
+              const oracle=ch.querySelector('.of-char-oracle');
+              if(d<160){
+                const intensity=1-d/160;
+                ch.style.borderColor=`rgba(212,175,55,${0.04+intensity*0.3})`;
+                if(oracle){
+                  oracle.style.color=`rgba(212,175,55,${0.15+intensity*0.85})`;
+                  oracle.style.filter=`drop-shadow(0 0 ${intensity*16}px rgba(212,175,55,${intensity*0.5}))`;
+                }
+              }else{
+                ch.style.borderColor='';
+                if(oracle){oracle.style.color='';oracle.style.filter='';}
+              }
+            });
+            mraf=null;
+          });
+        });
+      }
+
+    })();
+    // =============================================
+    // 全局生命力系统 · Living Canvas
+    // =============================================
+
+    // 鼠标跟随光晕+光点（RAF丝滑版）
+    (function(){
+      const cursor=document.getElementById('lcCursor');
+      const dot=document.getElementById('lcDot');
+      if(!cursor||!dot)return;
+
+      let mx=0,my=0;        // 鼠标真实坐标
+      let cx=0,cy=0;        // 光晕当前坐标（缓动）
+      let dx=0,dy=0;        // 光点当前坐标（快速缓动）
+      let active=false;
+
+      document.addEventListener('mousemove',e=>{
+        mx=e.clientX;
+        my=e.clientY;
+        if(!active){
+          active=true;
+          cursor.classList.add('active');
+          dot.classList.add('active');
+          cx=mx;cy=my;dx=mx;dy=my;
+        }
+      });
+
+      document.addEventListener('mouseleave',()=>{
+        active=false;
+        cursor.classList.remove('active');
+        dot.classList.remove('active');
+      });
+
+      // RAF驱动，光晕用缓动跟随，光点近乎实时
+      function tick(){
+        if(active){
+          // 光晕：平滑缓动（0.12 = 跟随速度，越大越快）
+          cx+=(mx-cx)*0.12;
+          cy+=(my-cy)*0.12;
+          cursor.style.transform=`translate(${cx-200}px,${cy-200}px)`;
+
+          // 光点：快速跟随
+          dx+=(mx-dx)*0.35;
+          dy+=(my-dy)*0.35;
+          dot.style.transform=`translate(${dx-2.5}px,${dy-2.5}px)`;
+        }
+        requestAnimationFrame(tick);
+      }
+      tick();
+
+      // hover卡片时光晕放大
+      document.addEventListener('mouseover',e=>{
+        if(e.target.closest('.hs-card,.ph-card,.of-char,.oracle-card,.product-card,.cat-card'))
+          cursor.classList.add('expand');
+      });
+      document.addEventListener('mouseout',e=>{
+        if(e.target.closest('.hs-card,.ph-card,.of-char,.oracle-card,.product-card,.cat-card'))
+          cursor.classList.remove('expand');
+      });
+    })();
+
+    // 点击涟漪
+    document.addEventListener('click',e=>{
+      const r=document.createElement('div');
+      r.className='lc-ripple';
+      r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';
+      document.body.appendChild(r);
+      setTimeout(()=>r.remove(),1200);
+    });
+
+    // 浮游光点
+    (function(){
+      const box=document.getElementById('lcFireflies');
+      if(!box)return;
+      for(let i=0;i<35;i++){
+        const f=document.createElement('div');
+        f.className='lc-fly';
+        const size=1+Math.random()*3;
+        f.style.width=size+'px';f.style.height=size+'px';
+        f.style.left=(Math.random()*100)+'%';
+        f.style.top=(Math.random()*100)+'%';
+        f.style.setProperty('--fd',(8+Math.random()*12)+'s');
+        f.style.setProperty('--fdelay',(-Math.random()*10)+'s');
+        f.style.setProperty('--fo',(0.1+Math.random()*0.25).toFixed(2));
+        f.style.setProperty('--fx1',(Math.random()*100-50)+'px');
+        f.style.setProperty('--fy1',(Math.random()*80-40)+'px');
+        f.style.setProperty('--fx2',(Math.random()*120-60)+'px');
+        f.style.setProperty('--fy2',(Math.random()*100-50)+'px');
+        f.style.setProperty('--fx3',(Math.random()*80-40)+'px');
+        f.style.setProperty('--fy3',(Math.random()*60-30)+'px');
+        box.appendChild(f);
+      }
+    })();
+
+    // 流体色块跟随鼠标
+    (function(){
+      const blobs=document.querySelectorAll('.lc-blob');
+      let mx=0.5,my=0.5;
+      document.addEventListener('mousemove',e=>{
+        mx=e.clientX/window.innerWidth;
+        my=e.clientY/window.innerHeight;
+      });
+      function drift(){
+        blobs.forEach((b,i)=>{
+          b.style.marginLeft=(mx-0.5)*(20+i*8)+'px';
+          b.style.marginTop=(my-0.5)*(15+i*6)+'px';
+        });
+        requestAnimationFrame(drift);
+      }
+      drift();
+    })();
+
+    // 流动分隔线Canvas
+    (function(){
+      document.querySelectorAll('.flow-canvas').forEach(canvas=>{
+        const ctx=canvas.getContext('2d');
+        let w,h,t=Math.random()*100;
+        function resize(){
+          const rect=canvas.parentElement.getBoundingClientRect();
+          canvas.width=rect.width*2;
+          canvas.height=rect.height*2;
+          w=rect.width;h=rect.height;
+          ctx.setTransform(2,0,0,2,0,0);
+        }
+        resize();
+        window.addEventListener('resize',resize);
+        function draw(){
+          t+=0.015;
+          ctx.clearRect(0,0,w,h);
+          for(let l=0;l<4;l++){
+            ctx.beginPath();
+            const baseY=h/2;
+            const amp=2+l*1.8;
+            const freq=0.006+l*0.003;
+            const spd=t*(1+l*0.25);
+            ctx.moveTo(0,baseY);
+            for(let x=0;x<=w;x+=2){
+              const y=baseY+Math.sin(x*freq+spd)*amp+Math.sin(x*freq*2.3+spd*0.7)*amp*0.4+Math.cos(x*freq*0.5+spd*1.3)*amp*0.3;
+              ctx.lineTo(x,y);
+            }
+            ctx.strokeStyle=`rgba(212,175,55,${0.03+l*0.015})`;
+            ctx.lineWidth=0.8;
+            ctx.stroke();
+          }
+          const glowX=w/2+Math.sin(t*0.6)*w*0.35;
+          const grad=ctx.createRadialGradient(glowX,h/2,0,glowX,h/2,80);
+          grad.addColorStop(0,'rgba(212,175,55,0.05)');
+          grad.addColorStop(1,'transparent');
+          ctx.fillStyle=grad;
+          ctx.fillRect(0,0,w,h);
+          requestAnimationFrame(draw);
+        }
+        draw();
+      });
+    })();
+
+    // 背景视差
+    (function(){
+      const lc=document.getElementById('livingCanvas');
+      if(!lc)return;
+      window.addEventListener('scroll',()=>{
+        lc.style.transform='translateY('+window.scrollY*0.04+'px)';
+      },{passive:true});
+    })();
+
+    // 滚动时流纹加速
+    (function(){
+      let last=0;
+      const flow=document.querySelector('.lc-flow');
+      if(!flow)return;
+      window.addEventListener('scroll',()=>{
+        const delta=Math.abs(window.scrollY-last);last=window.scrollY;
+        flow.style.animationDuration=Math.max(1,20-delta*0.15)+'s';
+      },{passive:true});
+    })();
+
+    // 鼠标静止呼吸（兼容transform跟随）
+    (function(){
+      let idleTimer;
+      const cursor=document.getElementById('lcCursor');
+      if(!cursor)return;
+      let isIdle=false;
+      document.addEventListener('mousemove',()=>{
+        if(isIdle){isIdle=false;cursor.style.width='';cursor.style.height='';cursor.style.opacity=''}
+        clearTimeout(idleTimer);
+        idleTimer=setTimeout(()=>{
+          isIdle=true;
+          // 用CSS属性动画模拟呼吸，不影响transform
+          cursor.style.transition='width 1.5s ease-in-out,height 1.5s ease-in-out,opacity 1.5s ease-in-out';
+          function pulse(){
+            if(!isIdle)return;
+            cursor.style.width='500px';cursor.style.height='500px';cursor.style.opacity='.3';
+            setTimeout(()=>{
+              if(!isIdle)return;
+              cursor.style.width='400px';cursor.style.height='400px';cursor.style.opacity='.6';
+              setTimeout(()=>pulse(),1500);
+            },1500);
+          }
+          pulse();
+        },2500);
+      });
+    })();
+
+    // 页面加载流体入场
+    (function(){
+      document.querySelectorAll('.lc-blob').forEach((b,i)=>{
+        b.style.opacity='0';b.style.transform='scale(0.3)';
+        b.style.transition='all 2s cubic-bezier(.16,1,.3,1)';
+        setTimeout(()=>{b.style.opacity='';b.style.transform=''},500+i*400);
+      });
+    })();
+
+    
+
+
+    // =============================================
+    // 右侧卡片增强交互
+    // =============================================
+    (function(){
+      document.querySelectorAll('.h3-rcard').forEach(card=>{
+        // 光标追踪高光
+        card.addEventListener('mousemove',e=>{
+          const r=card.getBoundingClientRect();
+          const glow=card.querySelector('.h3-rc-glow');
+          if(glow){
+            const x=((e.clientX-r.left)/r.width*100).toFixed(0);
+            const y=((e.clientY-r.top)/r.height*100).toFixed(0);
+            glow.style.background=`radial-gradient(circle at ${x}% ${y}%,rgba(180,140,40,.08) 0%,transparent 50%)`;
+            glow.style.opacity='1';
+          }
+          // 微倾斜
+          const mx=(e.clientX-r.left)/r.width-0.5;
+          const my=(e.clientY-r.top)/r.height-0.5;
+          card.style.transform=`translateX(-12px) scale(1.03) rotateY(${mx*5}deg) rotateX(${-my*4}deg)`;
+        });
+
+        card.addEventListener('mouseleave',()=>{
+          const glow=card.querySelector('.h3-rc-glow');
+          if(glow)glow.style.opacity='0';
+          card.style.transform='';
+        });
+
+        // 进度条动画
+        const observer=new IntersectionObserver(entries=>{
+          entries.forEach(en=>{
+            if(en.isIntersecting){
+              setTimeout(()=>card.classList.add('visible'),200);
+              observer.unobserve(card);
+            }
+          });
+        },{threshold:0.3});
+        observer.observe(card);
+      });
+    })();
+    // =============================================
+    // Hero · 黄金铸造3D & 华丽星图遗迹引擎
+    // =============================================
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      // --- 1. 入场动画 ---
+      setTimeout(() => {
+        document.querySelectorAll('.h3-t-reveal').forEach((el) => {
+          setTimeout(() => el.classList.add('visible'), parseInt(el.dataset.delay || 0));
+        });
+      }, 200);
+
+      // --- 2. 3D 文字逻辑 (鼠标倾斜 & 自动轮播) ---
+      const goldWrap = document.getElementById('goldWrap');
+      const charFace = document.getElementById('charFace');
+      const charDepth = document.getElementById('charDepth');
+      const charShadow = document.getElementById('charShadow');
+      const label = document.getElementById('h3ClText');
+
+      document.getElementById('hero3d').addEventListener('mousemove', e => {
+        const rect = goldWrap.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        // 丝滑偏转，展现 60层 text-shadow 的完美厚度
+        const rotY = Math.max(-25, Math.min(25, (e.clientX - cx) * 0.05));
+        const rotX = Math.max(-20, Math.min(20, -(e.clientY - cy) * 0.05));
+        goldWrap.style.setProperty('--ry', `${rotY}deg`);
+        goldWrap.style.setProperty('--rx', `${rotX}deg`);
+      });
+      document.getElementById('hero3d').addEventListener('mouseleave', () => {
+        goldWrap.style.setProperty('--ry', `12deg`);
+        goldWrap.style.setProperty('--rx', `8deg`);
+      });
+
+      // 自动轮播
+      const wordList = [
+        { c: '甲', l: 'ORACLE BONE SCRIPT' },
+        { c: '骨', l: 'ANCIENT INSCRIPTION' },
+        { c: '文', l: 'CHINESE CHARACTER' },
+        { c: '鼎', l: 'BRONZE VESSEL' },
+        { c: '龍', l: 'DRAGON SPIRIT' }
+      ];
+      let wordIdx = 0;
+      setInterval(() => {
+        wordIdx = (wordIdx + 1) % wordList.length;
+        goldWrap.style.opacity = '0';
+        goldWrap.style.transform = `rotateY(var(--ry)) rotateX(var(--rx)) scale(0.85)`;
+        label.parentNode.style.opacity = '0';
+        
+        setTimeout(() => {
+          const char = wordList[wordIdx].c;
+          charFace.textContent = char;
+          charFace.setAttribute('data-char', char);
+          document.getElementById('charDepthY').textContent = char;
+          document.getElementById('charDepthX').textContent = char;
+          document.getElementById('charDepthXY').textContent = char;
+          label.textContent = wordList[wordIdx].l;
+          
+          goldWrap.style.opacity = '1';
+          goldWrap.style.transform = `rotateY(var(--ry)) rotateX(var(--rx)) scale(1)`;
+          label.parentNode.style.opacity = '1';
+        }, 500);
+      }, 4500);
+
+      // --- 3. 极度精美的全屏背景引擎 ---
+      const canvas = document.getElementById('richCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, time = 0;
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // 星网粒子
+      const stars = Array.from({length: 150}, () => ({
+        x: Math.random()*w, y: Math.random()*h, 
+        vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3,
+        s: Math.random()*2.5 + 0.5
+      }));
+
+      // 悬浮金文
+      const ancientChars = ['天','地','玄','黄','宇','宙','洪','荒','日','月','盈','昃'];
+      const glyphs = Array.from({length: 18}, () => ({
+        x: Math.random()*w, y: Math.random()*h,
+        char: ancientChars[Math.floor(Math.random()*ancientChars.length)],
+        size: Math.random()*70 + 30,
+        speedY: (Math.random()-0.5)*0.2 - 0.1,
+        rot: Math.random()*Math.PI*2,
+        rotS: (Math.random()-0.5)*0.01,
+        alpha: Math.random()*0.3 + 0.1
+      }));
+
+      // 游离的华丽大光斑
+      const orbs = Array.from({length: 8}, () => ({
+        x: Math.random()*w, y: Math.random()*h,
+        vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+        r: Math.random()*150 + 100
+      }));
+
+      function render() {
+        time += 0.008;
+        
+        // 1. 深邃的黑金星云底色
+        const bgGrad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w);
+        bgGrad.addColorStop(0, '#100c05');
+        bgGrad.addColorStop(0.6, '#050402');
+        bgGrad.addColorStop(1, '#000000');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 2. 游离的巨型光斑 (提升画面华丽度)
+        ctx.globalCompositeOperation = 'screen';
+        orbs.forEach(orb => {
+          orb.x += orb.vx; orb.y += orb.vy;
+          if(orb.x < -orb.r) orb.x = w+orb.r; if(orb.x > w+orb.r) orb.x = -orb.r;
+          if(orb.y < -orb.r) orb.y = h+orb.r; if(orb.y > h+orb.r) orb.y = -orb.r;
+          const oGrad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+          oGrad.addColorStop(0, 'rgba(212, 175, 55, 0.08)');
+          oGrad.addColorStop(1, 'transparent');
+          ctx.fillStyle = oGrad;
+          ctx.beginPath(); ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalCompositeOperation = 'source-over';
+
+        // 3. 极其精致的三重旋转法阵
+        ctx.save();
+        ctx.translate(w/2, h/2);
+        
+        // 核心巨大光晕
+        const coreGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 500);
+        coreGlow.addColorStop(0, 'rgba(212, 175, 55, 0.15)');
+        coreGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = coreGlow;
+        ctx.beginPath(); ctx.arc(0, 0, 500, 0, Math.PI*2); ctx.fill();
+
+        // 外圈阵法 (顺时针，极细金线)
+        ctx.save();
+        ctx.rotate(time * 0.2);
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 8]);
+        ctx.beginPath(); ctx.arc(0, 0, 420, 0, Math.PI*2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(0, 0, 410, 0, Math.PI*2); ctx.stroke();
+        // 外圈符文
+        ctx.fillStyle = 'rgba(212, 175, 55, 0.4)';
+        ctx.font = '14px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for(let i=0; i<12; i++) {
+          ctx.save(); ctx.rotate((Math.PI*2/12) * i); ctx.translate(0, -415);
+          ctx.fillText('+', 0, 0); ctx.restore();
+        }
+        ctx.restore();
+
+        // 中圈阵法 (逆时针，粗线断点刻度)
+        ctx.save();
+        ctx.rotate(-time * 0.15);
+        ctx.strokeStyle = 'rgba(255, 235, 150, 0.15)';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([20, 15]);
+        ctx.beginPath(); ctx.arc(0, 0, 320, 0, Math.PI*2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // 内圈八卦阵位 (顺时针)
+        ctx.save();
+        ctx.rotate(time * 0.3);
+        ctx.fillStyle = 'rgba(212, 175, 55, 0.3)';
+        ctx.font = '22px KaiTi'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const bagua = ['☰','☱','☲','☳','☴','☵','☶','☷'];
+        for(let i=0; i<8; i++) {
+          ctx.save(); ctx.rotate((Math.PI*2/8) * i); ctx.translate(0, -250);
+          ctx.fillText(bagua[i], 0, 0); ctx.restore();
+        }
+        ctx.restore();
+        ctx.restore(); // 结束中心偏移
+
+        // 4. 星图网络连线
+        ctx.lineWidth = 0.6;
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+          s.x += s.vx; s.y += s.vy;
+          if(s.x < 0 || s.x > w) s.vx *= -1;
+          if(s.y < 0 || s.y > h) s.vy *= -1;
+          
+          ctx.fillStyle = `rgba(255, 245, 180, ${0.4 + Math.sin(time*15 + s.x)*0.4})`;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
+
+          for (let j = i + 1; j < stars.length; j++) {
+            const s2 = stars[j];
+            const dist = Math.hypot(s.x - s2.x, s.y - s2.y);
+            if (dist < 120) {
+              ctx.strokeStyle = `rgba(212, 175, 55, ${(1 - dist/120) * 0.3})`;
+              ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
+            }
+          }
+        }
+
+        // 5. 悬浮的远古金文
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        glyphs.forEach(g => {
+          g.y += g.speedY; g.rot += g.rotS;
+          if(g.y < -100) { g.y = h + 100; g.x = Math.random()*w; }
+          if(g.y > h + 100) { g.y = -100; g.x = Math.random()*w; }
+          
+          ctx.save();
+          ctx.translate(g.x, g.y);
+          ctx.rotate(g.rot);
+          ctx.fillStyle = `rgba(212, 175, 55, ${g.alpha})`;
+          ctx.font = `${g.size}px "STKaiti", "KaiTi", serif`;
+          ctx.fillText(g.char, 0, 0);
+          
+          // 微弱的金边
+          ctx.strokeStyle = `rgba(255, 245, 180, ${g.alpha * 0.5})`;
+          ctx.lineWidth = 1;
+          ctx.strokeText(g.char, 0, 0);
+          ctx.restore();
+        });
+
+        requestAnimationFrame(render);
+      }
+      render();
+    });
+  </script>
+</body>
+</html>
